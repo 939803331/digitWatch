@@ -1,0 +1,463 @@
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s 			page 1
+
+
+   1              		.cpu cortex-m3
+   2              		.arch armv7-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"revolve.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Core/Src/revolve.c"
+  18              		.section	.text.display_revolve,"ax",%progbits
+  19              		.align	1
+  20              		.global	display_revolve
+  21              		.syntax unified
+  22              		.thumb
+  23              		.thumb_func
+  25              	display_revolve:
+  26              	.LVL0:
+  27              	.LFB65:
+   1:Core/Src/revolve.c **** #include "revolve.h"
+   2:Core/Src/revolve.c **** #include "main.h"
+   3:Core/Src/revolve.c **** #include <math.h>
+   4:Core/Src/revolve.c **** 
+   5:Core/Src/revolve.c **** #define DIGIT_LEN 12
+   6:Core/Src/revolve.c **** // 旋转灯位
+   7:Core/Src/revolve.c **** const uint16_t DIGIT[12] = {
+   8:Core/Src/revolve.c ****     DIGIT_1_Pin, DIGIT_2_Pin, DIGIT_3_Pin, DIGIT_4_Pin, DIGIT_4_Pin, DIGIT_4_Pin, DIGIT_4_Pin,
+   9:Core/Src/revolve.c ****     DIGIT_3_Pin, DIGIT_2_Pin, DIGIT_1_Pin, DIGIT_1_Pin, DIGIT_1_Pin};
+  10:Core/Src/revolve.c **** 
+  11:Core/Src/revolve.c **** // 旋转灯段
+  12:Core/Src/revolve.c **** const uint8_t CODE[12] = {
+  13:Core/Src/revolve.c ****     0x01, 0x01, 0x01, 0x01, 0x02, 0x04, 0x08, 0x08, 0x08, 0x08, 0x10, 0x20};
+  14:Core/Src/revolve.c **** 
+  15:Core/Src/revolve.c **** void display_revolve(uint32_t Delay)
+  16:Core/Src/revolve.c **** {
+  28              		.loc 1 16 1 view -0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		.loc 1 16 1 is_stmt 0 view .LVU1
+  33 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+  34              	.LCFI0:
+  35              		.cfi_def_cfa_offset 24
+  36              		.cfi_offset 3, -24
+  37              		.cfi_offset 4, -20
+  38              		.cfi_offset 5, -16
+  39              		.cfi_offset 6, -12
+  40              		.cfi_offset 7, -8
+  41              		.cfi_offset 14, -4
+  42 0002 0746     		mov	r7, r0
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s 			page 2
+
+
+  17:Core/Src/revolve.c ****     for (uint8_t i = 0; i < DIGIT_LEN; i++)
+  43              		.loc 1 17 5 is_stmt 1 view .LVU2
+  44              	.LBB2:
+  45              		.loc 1 17 10 view .LVU3
+  46              	.LVL1:
+  47              		.loc 1 17 18 is_stmt 0 view .LVU4
+  48 0004 0026     		movs	r6, #0
+  49              		.loc 1 17 5 view .LVU5
+  50 0006 13E0     		b	.L2
+  51              	.LVL2:
+  52              	.L4:
+  53              	.LBB3:
+  18:Core/Src/revolve.c ****     {
+  19:Core/Src/revolve.c **** 
+  20:Core/Src/revolve.c ****         HAL_GPIO_WritePin(GPIOA, DIGIT_1_Pin | DIGIT_2_Pin | DIGIT_3_Pin | DIGIT_4_Pin, GPIO_PIN_SE
+  21:Core/Src/revolve.c **** 
+  22:Core/Src/revolve.c ****         HAL_GPIO_WritePin(GPIOA, DIGIT[i], GPIO_PIN_RESET);
+  23:Core/Src/revolve.c **** 
+  24:Core/Src/revolve.c ****         for (uint8_t j = 0; j < 7; j++)
+  25:Core/Src/revolve.c ****         {
+  26:Core/Src/revolve.c ****             HAL_GPIO_WritePin(GPIOA, LED_ARR[j], ((CODE[i] >> j) & 0x01) ? GPIO_PIN_SET : GPIO_PIN_
+  54              		.loc 1 26 13 is_stmt 1 view .LVU6
+  55              		.loc 1 26 56 is_stmt 0 view .LVU7
+  56 0008 154B     		ldr	r3, .L10
+  57 000a 5A5D     		ldrb	r2, [r3, r5]	@ zero_extendqisi2
+  58              		.loc 1 26 60 view .LVU8
+  59 000c 2241     		asrs	r2, r2, r4
+  60              		.loc 1 26 13 view .LVU9
+  61 000e 02F00102 		and	r2, r2, #1
+  62 0012 144B     		ldr	r3, .L10+4
+  63 0014 33F81410 		ldrh	r1, [r3, r4, lsl #1]
+  64 0018 1348     		ldr	r0, .L10+8
+  65 001a FFF7FEFF 		bl	HAL_GPIO_WritePin
+  66              	.LVL3:
+  24:Core/Src/revolve.c ****         {
+  67              		.loc 1 24 37 is_stmt 1 discriminator 3 view .LVU10
+  68 001e 0134     		adds	r4, r4, #1
+  69              	.LVL4:
+  24:Core/Src/revolve.c ****         {
+  70              		.loc 1 24 37 is_stmt 0 discriminator 3 view .LVU11
+  71 0020 E4B2     		uxtb	r4, r4
+  72              	.LVL5:
+  73              	.L3:
+  24:Core/Src/revolve.c ****         {
+  74              		.loc 1 24 31 is_stmt 1 discriminator 1 view .LVU12
+  75 0022 062C     		cmp	r4, #6
+  76 0024 F0D9     		bls	.L4
+  77              	.LBE3:
+  27:Core/Src/revolve.c ****         }
+  28:Core/Src/revolve.c **** 
+  29:Core/Src/revolve.c ****         if (isInStandby) {
+  78              		.loc 1 29 9 view .LVU13
+  79              		.loc 1 29 13 is_stmt 0 view .LVU14
+  80 0026 114B     		ldr	r3, .L10+12
+  81 0028 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  82              		.loc 1 29 12 view .LVU15
+  83 002a A3B9     		cbnz	r3, .L8
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s 			page 3
+
+
+  84              	.L5:
+  17:Core/Src/revolve.c ****     {
+  85              		.loc 1 17 41 is_stmt 1 discriminator 2 view .LVU16
+  86 002c 0136     		adds	r6, r6, #1
+  87              	.LVL6:
+  17:Core/Src/revolve.c ****     {
+  88              		.loc 1 17 41 is_stmt 0 discriminator 2 view .LVU17
+  89 002e F6B2     		uxtb	r6, r6
+  90              	.LVL7:
+  91              	.L2:
+  17:Core/Src/revolve.c ****     {
+  92              		.loc 1 17 27 is_stmt 1 discriminator 1 view .LVU18
+  93 0030 0B2E     		cmp	r6, #11
+  94 0032 14D8     		bhi	.L9
+  20:Core/Src/revolve.c **** 
+  95              		.loc 1 20 9 view .LVU19
+  96 0034 0C4C     		ldr	r4, .L10+8
+  97 0036 0122     		movs	r2, #1
+  98 0038 48F24061 		movw	r1, #34368
+  99 003c 2046     		mov	r0, r4
+ 100 003e FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 101              	.LVL8:
+  22:Core/Src/revolve.c **** 
+ 102              		.loc 1 22 9 view .LVU20
+ 103 0042 3546     		mov	r5, r6
+ 104 0044 0022     		movs	r2, #0
+ 105 0046 0A4B     		ldr	r3, .L10+16
+ 106 0048 33F81610 		ldrh	r1, [r3, r6, lsl #1]
+ 107 004c 2046     		mov	r0, r4
+ 108 004e FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 109              	.LVL9:
+  24:Core/Src/revolve.c ****         {
+ 110              		.loc 1 24 9 view .LVU21
+ 111              	.LBB4:
+  24:Core/Src/revolve.c ****         {
+ 112              		.loc 1 24 14 view .LVU22
+  24:Core/Src/revolve.c ****         {
+ 113              		.loc 1 24 22 is_stmt 0 view .LVU23
+ 114 0052 0024     		movs	r4, #0
+  24:Core/Src/revolve.c ****         {
+ 115              		.loc 1 24 9 view .LVU24
+ 116 0054 E5E7     		b	.L3
+ 117              	.LVL10:
+ 118              	.L8:
+  24:Core/Src/revolve.c ****         {
+ 119              		.loc 1 24 9 view .LVU25
+ 120              	.LBE4:
+  30:Core/Src/revolve.c ****             HAL_Delay(Delay);
+ 121              		.loc 1 30 13 is_stmt 1 view .LVU26
+ 122 0056 3846     		mov	r0, r7
+ 123 0058 FFF7FEFF 		bl	HAL_Delay
+ 124              	.LVL11:
+ 125 005c E6E7     		b	.L5
+ 126              	.LVL12:
+ 127              	.L9:
+ 128              		.loc 1 30 13 is_stmt 0 view .LVU27
+ 129              	.LBE2:
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s 			page 4
+
+
+  31:Core/Src/revolve.c ****         }
+  32:Core/Src/revolve.c ****     }
+  33:Core/Src/revolve.c **** }
+ 130              		.loc 1 33 1 view .LVU28
+ 131 005e F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 132              	.LVL13:
+ 133              	.L11:
+ 134              		.loc 1 33 1 view .LVU29
+ 135              		.align	2
+ 136              	.L10:
+ 137 0060 00000000 		.word	CODE
+ 138 0064 00000000 		.word	LED_ARR
+ 139 0068 00080140 		.word	1073809408
+ 140 006c 00000000 		.word	isInStandby
+ 141 0070 00000000 		.word	DIGIT
+ 142              		.cfi_endproc
+ 143              	.LFE65:
+ 145              		.section	.text.run_revolve,"ax",%progbits
+ 146              		.align	1
+ 147              		.global	run_revolve
+ 148              		.syntax unified
+ 149              		.thumb
+ 150              		.thumb_func
+ 152              	run_revolve:
+ 153              	.LFB66:
+  34:Core/Src/revolve.c **** 
+  35:Core/Src/revolve.c **** // 模式2
+  36:Core/Src/revolve.c **** void run_revolve()
+  37:Core/Src/revolve.c **** {
+ 154              		.loc 1 37 1 is_stmt 1 view -0
+ 155              		.cfi_startproc
+ 156              		@ args = 0, pretend = 0, frame = 0
+ 157              		@ frame_needed = 0, uses_anonymous_args = 0
+ 158 0000 10B5     		push	{r4, lr}
+ 159              	.LCFI1:
+ 160              		.cfi_def_cfa_offset 8
+ 161              		.cfi_offset 4, -8
+ 162              		.cfi_offset 14, -4
+  38:Core/Src/revolve.c ****     float k = 0.3;  // 控制加速快慢的参数（越大加速越快）
+ 163              		.loc 1 38 5 view .LVU31
+ 164              	.LVL14:
+  39:Core/Src/revolve.c ****     float step = 0; // 变化步长
+ 165              		.loc 1 39 5 view .LVU32
+  40:Core/Src/revolve.c ****     uint32_t Delay;
+ 166              		.loc 1 40 5 view .LVU33
+  41:Core/Src/revolve.c **** 
+  42:Core/Src/revolve.c ****     // 加速阶段：Delay 由 100 迅速降到 10
+  43:Core/Src/revolve.c ****     for (step = 0; step < 10; step++)
+ 167              		.loc 1 43 5 view .LVU34
+ 168              		.loc 1 43 15 is_stmt 0 view .LVU35
+ 169 0002 0024     		movs	r4, #0
+ 170              		.loc 1 43 5 view .LVU36
+ 171 0004 07E0     		b	.L13
+ 172              	.LVL15:
+ 173              	.L14:
+  44:Core/Src/revolve.c ****     {
+  45:Core/Src/revolve.c ****         Delay = 100 * exp(-k * step); // 指数衰减
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s 			page 5
+
+
+  46:Core/Src/revolve.c ****         if (Delay < 10)
+  47:Core/Src/revolve.c ****             Delay = 10; // 最小延迟限制
+  48:Core/Src/revolve.c ****         display_revolve(Delay);
+ 174              		.loc 1 48 9 is_stmt 1 view .LVU37
+ 175 0006 FFF7FEFF 		bl	display_revolve
+ 176              	.LVL16:
+  43:Core/Src/revolve.c ****     {
+ 177              		.loc 1 43 35 discriminator 2 view .LVU38
+ 178 000a 4FF07E51 		mov	r1, #1065353216
+ 179 000e 2046     		mov	r0, r4
+ 180 0010 FFF7FEFF 		bl	__aeabi_fadd
+ 181              	.LVL17:
+ 182 0014 0446     		mov	r4, r0
+ 183              	.LVL18:
+ 184              	.L13:
+  43:Core/Src/revolve.c ****     {
+ 185              		.loc 1 43 25 discriminator 1 view .LVU39
+ 186 0016 1C49     		ldr	r1, .L24
+ 187 0018 2046     		mov	r0, r4
+ 188 001a FFF7FEFF 		bl	__aeabi_fcmplt
+ 189              	.LVL19:
+ 190 001e 88B1     		cbz	r0, .L22
+  45:Core/Src/revolve.c ****         if (Delay < 10)
+ 191              		.loc 1 45 9 view .LVU40
+  45:Core/Src/revolve.c ****         if (Delay < 10)
+ 192              		.loc 1 45 30 is_stmt 0 view .LVU41
+ 193 0020 1A49     		ldr	r1, .L24+4
+ 194 0022 2046     		mov	r0, r4
+ 195 0024 FFF7FEFF 		bl	__aeabi_fmul
+ 196              	.LVL20:
+  45:Core/Src/revolve.c ****         if (Delay < 10)
+ 197              		.loc 1 45 23 view .LVU42
+ 198 0028 FFF7FEFF 		bl	__aeabi_f2d
+ 199              	.LVL21:
+ 200 002c FFF7FEFF 		bl	exp
+ 201              	.LVL22:
+  45:Core/Src/revolve.c ****         if (Delay < 10)
+ 202              		.loc 1 45 21 discriminator 1 view .LVU43
+ 203 0030 0022     		movs	r2, #0
+ 204 0032 174B     		ldr	r3, .L24+8
+ 205 0034 FFF7FEFF 		bl	__aeabi_dmul
+ 206              	.LVL23:
+  45:Core/Src/revolve.c ****         if (Delay < 10)
+ 207              		.loc 1 45 15 discriminator 1 view .LVU44
+ 208 0038 FFF7FEFF 		bl	__aeabi_d2uiz
+ 209              	.LVL24:
+  46:Core/Src/revolve.c ****             Delay = 10; // 最小延迟限制
+ 210              		.loc 1 46 9 is_stmt 1 view .LVU45
+  46:Core/Src/revolve.c ****             Delay = 10; // 最小延迟限制
+ 211              		.loc 1 46 12 is_stmt 0 view .LVU46
+ 212 003c 0928     		cmp	r0, #9
+ 213 003e E2D8     		bhi	.L14
+  47:Core/Src/revolve.c ****         display_revolve(Delay);
+ 214              		.loc 1 47 19 view .LVU47
+ 215 0040 0A20     		movs	r0, #10
+ 216              	.LVL25:
+  47:Core/Src/revolve.c ****         display_revolve(Delay);
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s 			page 6
+
+
+ 217              		.loc 1 47 19 view .LVU48
+ 218 0042 E0E7     		b	.L14
+ 219              	.LVL26:
+ 220              	.L22:
+  49:Core/Src/revolve.c ****     }
+  50:Core/Src/revolve.c **** 
+  51:Core/Src/revolve.c ****     // 减速阶段：Delay 由 10 逐渐回升到 100
+  52:Core/Src/revolve.c ****     for (step = 10; step > 0; step--)
+ 221              		.loc 1 52 15 view .LVU49
+ 222 0044 104C     		ldr	r4, .L24
+ 223              	.LVL27:
+ 224              		.loc 1 52 15 view .LVU50
+ 225 0046 07E0     		b	.L16
+ 226              	.LVL28:
+ 227              	.L17:
+  53:Core/Src/revolve.c ****     {
+  54:Core/Src/revolve.c ****         Delay = 100 * exp(-k * step);
+  55:Core/Src/revolve.c ****         if (Delay < 10)
+  56:Core/Src/revolve.c ****             Delay = 10;
+  57:Core/Src/revolve.c ****         display_revolve(Delay);
+ 228              		.loc 1 57 9 is_stmt 1 view .LVU51
+ 229 0048 FFF7FEFF 		bl	display_revolve
+ 230              	.LVL29:
+  52:Core/Src/revolve.c ****     {
+ 231              		.loc 1 52 35 discriminator 2 view .LVU52
+ 232 004c 4FF07E51 		mov	r1, #1065353216
+ 233 0050 2046     		mov	r0, r4
+ 234 0052 FFF7FEFF 		bl	__aeabi_fsub
+ 235              	.LVL30:
+ 236 0056 0446     		mov	r4, r0
+ 237              	.LVL31:
+ 238              	.L16:
+  52:Core/Src/revolve.c ****     {
+ 239              		.loc 1 52 26 discriminator 1 view .LVU53
+ 240 0058 0021     		movs	r1, #0
+ 241 005a 2046     		mov	r0, r4
+ 242 005c FFF7FEFF 		bl	__aeabi_fcmpgt
+ 243              	.LVL32:
+ 244 0060 88B1     		cbz	r0, .L23
+  54:Core/Src/revolve.c ****         if (Delay < 10)
+ 245              		.loc 1 54 9 view .LVU54
+  54:Core/Src/revolve.c ****         if (Delay < 10)
+ 246              		.loc 1 54 30 is_stmt 0 view .LVU55
+ 247 0062 0A49     		ldr	r1, .L24+4
+ 248 0064 2046     		mov	r0, r4
+ 249 0066 FFF7FEFF 		bl	__aeabi_fmul
+ 250              	.LVL33:
+  54:Core/Src/revolve.c ****         if (Delay < 10)
+ 251              		.loc 1 54 23 view .LVU56
+ 252 006a FFF7FEFF 		bl	__aeabi_f2d
+ 253              	.LVL34:
+ 254 006e FFF7FEFF 		bl	exp
+ 255              	.LVL35:
+  54:Core/Src/revolve.c ****         if (Delay < 10)
+ 256              		.loc 1 54 21 discriminator 1 view .LVU57
+ 257 0072 0022     		movs	r2, #0
+ 258 0074 064B     		ldr	r3, .L24+8
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s 			page 7
+
+
+ 259 0076 FFF7FEFF 		bl	__aeabi_dmul
+ 260              	.LVL36:
+  54:Core/Src/revolve.c ****         if (Delay < 10)
+ 261              		.loc 1 54 15 discriminator 1 view .LVU58
+ 262 007a FFF7FEFF 		bl	__aeabi_d2uiz
+ 263              	.LVL37:
+  55:Core/Src/revolve.c ****             Delay = 10;
+ 264              		.loc 1 55 9 is_stmt 1 view .LVU59
+  55:Core/Src/revolve.c ****             Delay = 10;
+ 265              		.loc 1 55 12 is_stmt 0 view .LVU60
+ 266 007e 0928     		cmp	r0, #9
+ 267 0080 E2D8     		bhi	.L17
+  56:Core/Src/revolve.c ****         display_revolve(Delay);
+ 268              		.loc 1 56 19 view .LVU61
+ 269 0082 0A20     		movs	r0, #10
+ 270              	.LVL38:
+  56:Core/Src/revolve.c ****         display_revolve(Delay);
+ 271              		.loc 1 56 19 view .LVU62
+ 272 0084 E0E7     		b	.L17
+ 273              	.LVL39:
+ 274              	.L23:
+  58:Core/Src/revolve.c ****     }
+  59:Core/Src/revolve.c **** }
+ 275              		.loc 1 59 1 view .LVU63
+ 276 0086 10BD     		pop	{r4, pc}
+ 277              	.LVL40:
+ 278              	.L25:
+ 279              		.loc 1 59 1 view .LVU64
+ 280              		.align	2
+ 281              	.L24:
+ 282 0088 00002041 		.word	1092616192
+ 283 008c 9A9999BE 		.word	-1097229926
+ 284 0090 00005940 		.word	1079574528
+ 285              		.cfi_endproc
+ 286              	.LFE66:
+ 288              		.global	CODE
+ 289              		.section	.rodata.CODE,"a"
+ 290              		.align	2
+ 293              	CODE:
+ 294 0000 01010101 		.ascii	"\001\001\001\001\002\004\010\010\010\010\020 "
+ 294      02040808 
+ 294      08081020 
+ 295              		.global	DIGIT
+ 296              		.section	.rodata.DIGIT,"a"
+ 297              		.align	2
+ 300              	DIGIT:
+ 301 0000 0080     		.short	-32768
+ 302 0002 0004     		.short	1024
+ 303 0004 0002     		.short	512
+ 304 0006 4000     		.short	64
+ 305 0008 4000     		.short	64
+ 306 000a 4000     		.short	64
+ 307 000c 4000     		.short	64
+ 308 000e 0002     		.short	512
+ 309 0010 0004     		.short	1024
+ 310 0012 0080     		.short	-32768
+ 311 0014 0080     		.short	-32768
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s 			page 8
+
+
+ 312 0016 0080     		.short	-32768
+ 313              		.text
+ 314              	.Letext0:
+ 315              		.file 2 "D:/arm-none-eabi-gcc/arm-none-eabi/include/machine/_default_types.h"
+ 316              		.file 3 "D:/arm-none-eabi-gcc/arm-none-eabi/include/sys/_stdint.h"
+ 317              		.file 4 "Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h"
+ 318              		.file 5 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h"
+ 319              		.file 6 "Core/Inc/main.h"
+ 320              		.file 7 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h"
+ 321              		.file 8 "D:/arm-none-eabi-gcc/arm-none-eabi/include/math.h"
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s 			page 9
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 revolve.c
+C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s:19     .text.display_revolve:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s:25     .text.display_revolve:00000000 display_revolve
+C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s:137    .text.display_revolve:00000060 $d
+C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s:293    .rodata.CODE:00000000 CODE
+C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s:300    .rodata.DIGIT:00000000 DIGIT
+C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s:146    .text.run_revolve:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s:152    .text.run_revolve:00000000 run_revolve
+C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s:282    .text.run_revolve:00000088 $d
+C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s:290    .rodata.CODE:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccK24Wtf.s:297    .rodata.DIGIT:00000000 $d
+
+UNDEFINED SYMBOLS
+HAL_GPIO_WritePin
+HAL_Delay
+LED_ARR
+isInStandby
+__aeabi_fadd
+__aeabi_fcmplt
+__aeabi_fmul
+__aeabi_f2d
+exp
+__aeabi_dmul
+__aeabi_d2uiz
+__aeabi_fsub
+__aeabi_fcmpgt

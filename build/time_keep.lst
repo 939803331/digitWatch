@@ -1,0 +1,754 @@
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 1
+
+
+   1              		.cpu cortex-m3
+   2              		.arch armv7-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"time_keep.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Core/Src/time_keep.c"
+  18              		.section	.text.addElapsedTime,"ax",%progbits
+  19              		.align	1
+  20              		.global	addElapsedTime
+  21              		.syntax unified
+  22              		.thumb
+  23              		.thumb_func
+  25              	addElapsedTime:
+  26              	.LFB65:
+   1:Core/Src/time_keep.c **** #include "time_keep.h"
+   2:Core/Src/time_keep.c **** #include "main.h"
+   3:Core/Src/time_keep.c **** 
+   4:Core/Src/time_keep.c **** uint32_t elapsedTime = 0; // elapsedTime 单位为毫秒
+   5:Core/Src/time_keep.c **** uint8_t isTiming = 0;     // 是否正在计时
+   6:Core/Src/time_keep.c **** 
+   7:Core/Src/time_keep.c **** void addElapsedTime()
+   8:Core/Src/time_keep.c **** {
+  27              		.loc 1 8 1 view -0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+   9:Core/Src/time_keep.c ****     elapsedTime += 1;
+  32              		.loc 1 9 5 view .LVU1
+  33              		.loc 1 9 17 is_stmt 0 view .LVU2
+  34 0000 024A     		ldr	r2, .L2
+  35 0002 1368     		ldr	r3, [r2]
+  36 0004 0133     		adds	r3, r3, #1
+  37 0006 1360     		str	r3, [r2]
+  10:Core/Src/time_keep.c **** }
+  38              		.loc 1 10 1 view .LVU3
+  39 0008 7047     		bx	lr
+  40              	.L3:
+  41 000a 00BF     		.align	2
+  42              	.L2:
+  43 000c 00000000 		.word	elapsedTime
+  44              		.cfi_endproc
+  45              	.LFE65:
+  47              		.section	.text.display_time_keep,"ax",%progbits
+  48              		.align	1
+  49              		.global	display_time_keep
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 2
+
+
+  50              		.syntax unified
+  51              		.thumb
+  52              		.thumb_func
+  54              	display_time_keep:
+  55              	.LVL0:
+  56              	.LFB66:
+  11:Core/Src/time_keep.c **** 
+  12:Core/Src/time_keep.c **** void display_time_keep(uint8_t d[4], uint8_t flag)
+  13:Core/Src/time_keep.c **** {
+  57              		.loc 1 13 1 is_stmt 1 view -0
+  58              		.cfi_startproc
+  59              		@ args = 0, pretend = 0, frame = 0
+  60              		@ frame_needed = 0, uses_anonymous_args = 0
+  61              		.loc 1 13 1 is_stmt 0 view .LVU5
+  62 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+  63              	.LCFI0:
+  64              		.cfi_def_cfa_offset 24
+  65              		.cfi_offset 4, -24
+  66              		.cfi_offset 5, -20
+  67              		.cfi_offset 6, -16
+  68              		.cfi_offset 7, -12
+  69              		.cfi_offset 8, -8
+  70              		.cfi_offset 14, -4
+  71 0004 8046     		mov	r8, r0
+  72 0006 0F46     		mov	r7, r1
+  14:Core/Src/time_keep.c ****     // 将 d 分别显示到 4 位共阴数码管上
+  15:Core/Src/time_keep.c ****     for (uint8_t i = 0; i < DIGIT_COUNT; i++)
+  73              		.loc 1 15 5 is_stmt 1 view .LVU6
+  74              	.LBB2:
+  75              		.loc 1 15 10 view .LVU7
+  76              	.LVL1:
+  77              		.loc 1 15 18 is_stmt 0 view .LVU8
+  78 0008 0025     		movs	r5, #0
+  79              		.loc 1 15 5 view .LVU9
+  80 000a 1CE0     		b	.L5
+  81              	.LVL2:
+  82              	.L7:
+  83              	.LBB3:
+  84              	.LBB4:
+  16:Core/Src/time_keep.c ****     {
+  17:Core/Src/time_keep.c ****         HAL_GPIO_WritePin(GPIOA, DIGIT_1_Pin | DIGIT_2_Pin | DIGIT_3_Pin | DIGIT_4_Pin, GPIO_PIN_SE
+  18:Core/Src/time_keep.c **** 
+  19:Core/Src/time_keep.c ****         HAL_GPIO_WritePin(GPIOA, DIGIT_ARR[i], GPIO_PIN_RESET);
+  20:Core/Src/time_keep.c **** 
+  21:Core/Src/time_keep.c ****         uint8_t code = segment_code[d[i]];
+  22:Core/Src/time_keep.c ****         for (uint8_t j = 0; j < 7; j++)
+  23:Core/Src/time_keep.c ****         {
+  24:Core/Src/time_keep.c ****             HAL_GPIO_WritePin(GPIOA, LED_ARR[j], ((code >> j) & 0x01) ? GPIO_PIN_SET : GPIO_PIN_RES
+  85              		.loc 1 24 13 is_stmt 1 view .LVU10
+  86              		.loc 1 24 57 is_stmt 0 view .LVU11
+  87 000c 46FA04F2 		asr	r2, r6, r4
+  88              		.loc 1 24 13 view .LVU12
+  89 0010 02F00102 		and	r2, r2, #1
+  90 0014 1D4B     		ldr	r3, .L14
+  91 0016 33F81410 		ldrh	r1, [r3, r4, lsl #1]
+  92 001a 1D48     		ldr	r0, .L14+4
+  93 001c FFF7FEFF 		bl	HAL_GPIO_WritePin
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 3
+
+
+  94              	.LVL3:
+  22:Core/Src/time_keep.c ****         {
+  95              		.loc 1 22 37 is_stmt 1 discriminator 3 view .LVU13
+  96 0020 0134     		adds	r4, r4, #1
+  97              	.LVL4:
+  22:Core/Src/time_keep.c ****         {
+  98              		.loc 1 22 37 is_stmt 0 discriminator 3 view .LVU14
+  99 0022 E4B2     		uxtb	r4, r4
+ 100              	.LVL5:
+ 101              	.L6:
+  22:Core/Src/time_keep.c ****         {
+ 102              		.loc 1 22 31 is_stmt 1 discriminator 1 view .LVU15
+ 103 0024 062C     		cmp	r4, #6
+ 104 0026 F1D9     		bls	.L7
+ 105              	.LBE4:
+  25:Core/Src/time_keep.c ****         }
+  26:Core/Src/time_keep.c ****         if (flag == 1)
+ 106              		.loc 1 26 9 view .LVU16
+ 107              		.loc 1 26 12 is_stmt 0 view .LVU17
+ 108 0028 012F     		cmp	r7, #1
+ 109 002a 24D0     		beq	.L12
+  27:Core/Src/time_keep.c ****         {
+  28:Core/Src/time_keep.c ****             // 显示毫秒小数点
+  29:Core/Src/time_keep.c ****             HAL_GPIO_WritePin(GPIOA, LED_DP_Pin, (i == 2) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  30:Core/Src/time_keep.c ****         }
+  31:Core/Src/time_keep.c ****         else
+  32:Core/Src/time_keep.c ****         {
+  33:Core/Src/time_keep.c ****             // 显示时钟冒号
+  34:Core/Src/time_keep.c ****             HAL_GPIO_WritePin(GPIOA, LED_DP_Pin, (i == 1) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+ 110              		.loc 1 34 13 is_stmt 1 view .LVU18
+ 111 002c 012D     		cmp	r5, #1
+ 112 002e 14BF     		ite	ne
+ 113 0030 0022     		movne	r2, #0
+ 114 0032 0122     		moveq	r2, #1
+ 115 0034 0821     		movs	r1, #8
+ 116 0036 1648     		ldr	r0, .L14+4
+ 117 0038 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 118              	.LVL6:
+ 119              	.L9:
+  35:Core/Src/time_keep.c ****         }
+  36:Core/Src/time_keep.c **** 
+  37:Core/Src/time_keep.c ****         HAL_Delay(2);
+ 120              		.loc 1 37 9 view .LVU19
+ 121 003c 0220     		movs	r0, #2
+ 122 003e FFF7FEFF 		bl	HAL_Delay
+ 123              	.LVL7:
+ 124              	.LBE3:
+  15:Core/Src/time_keep.c ****     {
+ 125              		.loc 1 15 43 discriminator 2 view .LVU20
+ 126 0042 0135     		adds	r5, r5, #1
+ 127              	.LVL8:
+  15:Core/Src/time_keep.c ****     {
+ 128              		.loc 1 15 43 is_stmt 0 discriminator 2 view .LVU21
+ 129 0044 EDB2     		uxtb	r5, r5
+ 130              	.LVL9:
+ 131              	.L5:
+  15:Core/Src/time_keep.c ****     {
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 4
+
+
+ 132              		.loc 1 15 27 is_stmt 1 discriminator 1 view .LVU22
+ 133 0046 134B     		ldr	r3, .L14+8
+ 134 0048 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 135 004a AB42     		cmp	r3, r5
+ 136 004c 1CD9     		bls	.L13
+ 137              	.LBB6:
+  17:Core/Src/time_keep.c **** 
+ 138              		.loc 1 17 9 view .LVU23
+ 139 004e 104C     		ldr	r4, .L14+4
+ 140 0050 0122     		movs	r2, #1
+ 141 0052 48F24061 		movw	r1, #34368
+ 142 0056 2046     		mov	r0, r4
+ 143 0058 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 144              	.LVL10:
+  19:Core/Src/time_keep.c **** 
+ 145              		.loc 1 19 9 view .LVU24
+ 146 005c 0022     		movs	r2, #0
+ 147 005e 0E4B     		ldr	r3, .L14+12
+ 148 0060 33F81510 		ldrh	r1, [r3, r5, lsl #1]
+ 149 0064 2046     		mov	r0, r4
+ 150 0066 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 151              	.LVL11:
+  21:Core/Src/time_keep.c ****         for (uint8_t j = 0; j < 7; j++)
+ 152              		.loc 1 21 9 view .LVU25
+  21:Core/Src/time_keep.c ****         for (uint8_t j = 0; j < 7; j++)
+ 153              		.loc 1 21 38 is_stmt 0 view .LVU26
+ 154 006a 18F80530 		ldrb	r3, [r8, r5]	@ zero_extendqisi2
+  21:Core/Src/time_keep.c ****         for (uint8_t j = 0; j < 7; j++)
+ 155              		.loc 1 21 17 view .LVU27
+ 156 006e 0B4A     		ldr	r2, .L14+16
+ 157 0070 D65C     		ldrb	r6, [r2, r3]	@ zero_extendqisi2
+ 158              	.LVL12:
+  22:Core/Src/time_keep.c ****         {
+ 159              		.loc 1 22 9 is_stmt 1 view .LVU28
+ 160              	.LBB5:
+  22:Core/Src/time_keep.c ****         {
+ 161              		.loc 1 22 14 view .LVU29
+  22:Core/Src/time_keep.c ****         {
+ 162              		.loc 1 22 22 is_stmt 0 view .LVU30
+ 163 0072 0024     		movs	r4, #0
+  22:Core/Src/time_keep.c ****         {
+ 164              		.loc 1 22 9 view .LVU31
+ 165 0074 D6E7     		b	.L6
+ 166              	.LVL13:
+ 167              	.L12:
+  22:Core/Src/time_keep.c ****         {
+ 168              		.loc 1 22 9 view .LVU32
+ 169              	.LBE5:
+  29:Core/Src/time_keep.c ****         }
+ 170              		.loc 1 29 13 is_stmt 1 view .LVU33
+ 171 0076 022D     		cmp	r5, #2
+ 172 0078 14BF     		ite	ne
+ 173 007a 0022     		movne	r2, #0
+ 174 007c 0122     		moveq	r2, #1
+ 175 007e 0821     		movs	r1, #8
+ 176 0080 0348     		ldr	r0, .L14+4
+ 177 0082 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 5
+
+
+ 178              	.LVL14:
+ 179 0086 D9E7     		b	.L9
+ 180              	.LVL15:
+ 181              	.L13:
+  29:Core/Src/time_keep.c ****         }
+ 182              		.loc 1 29 13 is_stmt 0 view .LVU34
+ 183              	.LBE6:
+ 184              	.LBE2:
+  38:Core/Src/time_keep.c ****     }
+  39:Core/Src/time_keep.c **** }
+ 185              		.loc 1 39 1 view .LVU35
+ 186 0088 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 187              	.LVL16:
+ 188              	.L15:
+ 189              		.loc 1 39 1 view .LVU36
+ 190              		.align	2
+ 191              	.L14:
+ 192 008c 00000000 		.word	LED_ARR
+ 193 0090 00080140 		.word	1073809408
+ 194 0094 00000000 		.word	DIGIT_COUNT
+ 195 0098 00000000 		.word	DIGIT_ARR
+ 196 009c 00000000 		.word	segment_code
+ 197              		.cfi_endproc
+ 198              	.LFE66:
+ 200              		.section	.text.run_time_keep,"ax",%progbits
+ 201              		.align	1
+ 202              		.global	run_time_keep
+ 203              		.syntax unified
+ 204              		.thumb
+ 205              		.thumb_func
+ 207              	run_time_keep:
+ 208              	.LFB67:
+  40:Core/Src/time_keep.c **** 
+  41:Core/Src/time_keep.c **** void run_time_keep()
+  42:Core/Src/time_keep.c **** {
+ 209              		.loc 1 42 1 is_stmt 1 view -0
+ 210              		.cfi_startproc
+ 211              		@ args = 0, pretend = 0, frame = 8
+ 212              		@ frame_needed = 0, uses_anonymous_args = 0
+ 213 0000 00B5     		push	{lr}
+ 214              	.LCFI1:
+ 215              		.cfi_def_cfa_offset 4
+ 216              		.cfi_offset 14, -4
+ 217 0002 83B0     		sub	sp, sp, #12
+ 218              	.LCFI2:
+ 219              		.cfi_def_cfa_offset 16
+  43:Core/Src/time_keep.c ****     uint8_t d[4] = {0}; // 四个数字，分别对应数码管左到右
+ 220              		.loc 1 43 5 view .LVU38
+ 221              		.loc 1 43 13 is_stmt 0 view .LVU39
+ 222 0004 0023     		movs	r3, #0
+ 223 0006 0193     		str	r3, [sp, #4]
+  44:Core/Src/time_keep.c ****     // 格式标识
+  45:Core/Src/time_keep.c ****     uint8_t flag = 0;
+ 224              		.loc 1 45 5 is_stmt 1 view .LVU40
+ 225              	.LVL17:
+  46:Core/Src/time_keep.c **** 
+  47:Core/Src/time_keep.c ****     if (elapsedTime < 10UL * 60 * 1000) // 小于10分钟
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 6
+
+
+ 226              		.loc 1 47 5 view .LVU41
+ 227              		.loc 1 47 21 is_stmt 0 view .LVU42
+ 228 0008 4A4B     		ldr	r3, .L23
+ 229 000a 1B68     		ldr	r3, [r3]
+ 230              		.loc 1 47 8 view .LVU43
+ 231 000c 4A4A     		ldr	r2, .L23+4
+ 232 000e 9342     		cmp	r3, r2
+ 233 0010 32D8     		bhi	.L17
+ 234              	.LBB7:
+  48:Core/Src/time_keep.c ****     {
+  49:Core/Src/time_keep.c ****         // 计算：分钟为整分钟数（个位），秒为余下的秒数，毫秒这里用 100
+  50:Core/Src/time_keep.c ****         uint8_t minutes = elapsedTime / (60 * 1000);          // 0 ~ 9
+ 235              		.loc 1 50 9 is_stmt 1 view .LVU44
+ 236              		.loc 1 50 39 is_stmt 0 view .LVU45
+ 237 0012 4A4A     		ldr	r2, .L23+8
+ 238 0014 A2FB0312 		umull	r1, r2, r2, r3
+ 239 0018 4FEA923C 		lsr	ip, r2, #14
+ 240              		.loc 1 50 17 view .LVU46
+ 241 001c C2F38730 		ubfx	r0, r2, #14, #8
+ 242              	.LVL18:
+  51:Core/Src/time_keep.c ****         uint8_t seconds = (elapsedTime % (60 * 1000)) / 1000; // 0 ~ 59
+ 243              		.loc 1 51 9 is_stmt 1 view .LVU47
+ 244              		.loc 1 51 40 is_stmt 0 view .LVU48
+ 245 0020 4EF66021 		movw	r1, #60000
+ 246 0024 01FB1C31 		mls	r1, r1, ip, r3
+ 247              		.loc 1 51 55 view .LVU49
+ 248 0028 454A     		ldr	r2, .L23+12
+ 249 002a A2FB01C1 		umull	ip, r1, r2, r1
+ 250              		.loc 1 51 17 view .LVU50
+ 251 002e C1F38711 		ubfx	r1, r1, #6, #8
+ 252              	.LVL19:
+  52:Core/Src/time_keep.c ****         uint8_t ms_digit = (elapsedTime % 1000) / 100;        // 0 ~ 9（显示100ms的档位）
+ 253              		.loc 1 52 9 is_stmt 1 view .LVU51
+ 254              		.loc 1 52 41 is_stmt 0 view .LVU52
+ 255 0032 A2FB03C2 		umull	ip, r2, r2, r3
+ 256 0036 9209     		lsrs	r2, r2, #6
+ 257 0038 4FF47A7C 		mov	ip, #1000
+ 258 003c 0CFB1232 		mls	r2, ip, r2, r3
+ 259              		.loc 1 52 49 view .LVU53
+ 260 0040 404B     		ldr	r3, .L23+16
+ 261 0042 A3FB0232 		umull	r3, r2, r3, r2
+ 262              		.loc 1 52 17 view .LVU54
+ 263 0046 C2F34712 		ubfx	r2, r2, #5, #8
+ 264              	.LVL20:
+  53:Core/Src/time_keep.c **** 
+  54:Core/Src/time_keep.c ****         d[0] = minutes;      // 第一位：分钟
+ 265              		.loc 1 54 9 is_stmt 1 view .LVU55
+ 266              		.loc 1 54 14 is_stmt 0 view .LVU56
+ 267 004a 8DF80400 		strb	r0, [sp, #4]
+  55:Core/Src/time_keep.c ****         d[1] = seconds / 10; // 秒的十位
+ 268              		.loc 1 55 9 is_stmt 1 view .LVU57
+ 269              		.loc 1 55 14 is_stmt 0 view .LVU58
+ 270 004e 3E4B     		ldr	r3, .L23+20
+ 271 0050 A3FB0103 		umull	r0, r3, r3, r1
+ 272              	.LVL21:
+ 273              		.loc 1 55 14 view .LVU59
+ 274 0054 DB08     		lsrs	r3, r3, #3
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 7
+
+
+ 275 0056 8DF80530 		strb	r3, [sp, #5]
+  56:Core/Src/time_keep.c ****         d[2] = seconds % 10; // 秒的个位
+ 276              		.loc 1 56 9 is_stmt 1 view .LVU60
+ 277              		.loc 1 56 14 is_stmt 0 view .LVU61
+ 278 005a 03EB8303 		add	r3, r3, r3, lsl #2
+ 279 005e 5800     		lsls	r0, r3, #1
+ 280 0060 091A     		subs	r1, r1, r0
+ 281              	.LVL22:
+ 282              		.loc 1 56 14 view .LVU62
+ 283 0062 8DF80610 		strb	r1, [sp, #6]
+  57:Core/Src/time_keep.c ****         d[3] = ms_digit;     // 100ms档位
+ 284              		.loc 1 57 9 is_stmt 1 view .LVU63
+ 285              		.loc 1 57 14 is_stmt 0 view .LVU64
+ 286 0066 8DF80720 		strb	r2, [sp, #7]
+  58:Core/Src/time_keep.c ****         flag = 1;
+ 287              		.loc 1 58 9 is_stmt 1 view .LVU65
+ 288              	.LVL23:
+ 289              		.loc 1 58 14 is_stmt 0 view .LVU66
+ 290 006a 0121     		movs	r1, #1
+ 291              	.LVL24:
+ 292              	.L18:
+ 293              		.loc 1 58 14 view .LVU67
+ 294              	.LBE7:
+  59:Core/Src/time_keep.c ****     }
+  60:Core/Src/time_keep.c ****     else if (elapsedTime < 60UL * 60 * 1000) // 10分钟到60分钟之间
+  61:Core/Src/time_keep.c ****     {
+  62:Core/Src/time_keep.c ****         // 直接以 mm:ss 格式显示
+  63:Core/Src/time_keep.c ****         uint8_t minutes = elapsedTime / (60 * 1000);          // 10 ~ 59
+  64:Core/Src/time_keep.c ****         uint8_t seconds = (elapsedTime % (60 * 1000)) / 1000; // 0 ~ 59
+  65:Core/Src/time_keep.c **** 
+  66:Core/Src/time_keep.c ****         d[0] = minutes / 10; // 分钟十位
+  67:Core/Src/time_keep.c ****         d[1] = minutes % 10; // 分钟个位
+  68:Core/Src/time_keep.c ****         d[2] = seconds / 10; // 秒钟十位
+  69:Core/Src/time_keep.c ****         d[3] = seconds % 10; // 秒钟个位
+  70:Core/Src/time_keep.c ****         flag = 2;
+  71:Core/Src/time_keep.c ****     }
+  72:Core/Src/time_keep.c ****     else // 60分钟及以上，显示 hh:mm（最大 99:59）
+  73:Core/Src/time_keep.c ****     {
+  74:Core/Src/time_keep.c ****         uint16_t totalMinutes = elapsedTime / (60 * 1000);
+  75:Core/Src/time_keep.c ****         uint8_t hours = totalMinutes / 60; // 小时数
+  76:Core/Src/time_keep.c ****         if (hours > 99)
+  77:Core/Src/time_keep.c ****             hours = 99;                      // 最大99小时
+  78:Core/Src/time_keep.c ****         uint8_t minutes = totalMinutes % 60; // 分钟
+  79:Core/Src/time_keep.c **** 
+  80:Core/Src/time_keep.c ****         d[0] = hours / 10;   // 小时十位
+  81:Core/Src/time_keep.c ****         d[1] = hours % 10;   // 小时个位
+  82:Core/Src/time_keep.c ****         d[2] = minutes / 10; // 分钟十位
+  83:Core/Src/time_keep.c ****         d[3] = minutes % 10; // 分钟个位
+  84:Core/Src/time_keep.c ****         flag = 3;
+  85:Core/Src/time_keep.c ****     }
+  86:Core/Src/time_keep.c **** 
+  87:Core/Src/time_keep.c ****     display_time_keep(d, flag);
+ 295              		.loc 1 87 5 is_stmt 1 view .LVU68
+ 296 006c 01A8     		add	r0, sp, #4
+ 297 006e FFF7FEFF 		bl	display_time_keep
+ 298              	.LVL25:
+  88:Core/Src/time_keep.c **** }
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 8
+
+
+ 299              		.loc 1 88 1 is_stmt 0 view .LVU69
+ 300 0072 03B0     		add	sp, sp, #12
+ 301              	.LCFI3:
+ 302              		.cfi_remember_state
+ 303              		.cfi_def_cfa_offset 4
+ 304              		@ sp needed
+ 305 0074 5DF804FB 		ldr	pc, [sp], #4
+ 306              	.LVL26:
+ 307              	.L17:
+ 308              	.LCFI4:
+ 309              		.cfi_restore_state
+  60:Core/Src/time_keep.c ****     {
+ 310              		.loc 1 60 10 is_stmt 1 view .LVU70
+  60:Core/Src/time_keep.c ****     {
+ 311              		.loc 1 60 13 is_stmt 0 view .LVU71
+ 312 0078 344A     		ldr	r2, .L23+24
+ 313 007a 9342     		cmp	r3, r2
+ 314 007c 29D2     		bcs	.L19
+ 315              	.LBB8:
+  63:Core/Src/time_keep.c ****         uint8_t seconds = (elapsedTime % (60 * 1000)) / 1000; // 0 ~ 59
+ 316              		.loc 1 63 9 is_stmt 1 view .LVU72
+  63:Core/Src/time_keep.c ****         uint8_t seconds = (elapsedTime % (60 * 1000)) / 1000; // 0 ~ 59
+ 317              		.loc 1 63 39 is_stmt 0 view .LVU73
+ 318 007e 2F49     		ldr	r1, .L23+8
+ 319 0080 A1FB0321 		umull	r2, r1, r1, r3
+ 320 0084 880B     		lsrs	r0, r1, #14
+  63:Core/Src/time_keep.c ****         uint8_t seconds = (elapsedTime % (60 * 1000)) / 1000; // 0 ~ 59
+ 321              		.loc 1 63 17 view .LVU74
+ 322 0086 C1F38731 		ubfx	r1, r1, #14, #8
+ 323              	.LVL27:
+  64:Core/Src/time_keep.c **** 
+ 324              		.loc 1 64 9 is_stmt 1 view .LVU75
+  64:Core/Src/time_keep.c **** 
+ 325              		.loc 1 64 40 is_stmt 0 view .LVU76
+ 326 008a 4EF66022 		movw	r2, #60000
+ 327 008e 02FB1032 		mls	r2, r2, r0, r3
+  64:Core/Src/time_keep.c **** 
+ 328              		.loc 1 64 55 view .LVU77
+ 329 0092 2B4B     		ldr	r3, .L23+12
+ 330 0094 A3FB0223 		umull	r2, r3, r3, r2
+  64:Core/Src/time_keep.c **** 
+ 331              		.loc 1 64 17 view .LVU78
+ 332 0098 C3F38713 		ubfx	r3, r3, #6, #8
+ 333              	.LVL28:
+  66:Core/Src/time_keep.c ****         d[1] = minutes % 10; // 分钟个位
+ 334              		.loc 1 66 9 is_stmt 1 view .LVU79
+  66:Core/Src/time_keep.c ****         d[1] = minutes % 10; // 分钟个位
+ 335              		.loc 1 66 14 is_stmt 0 view .LVU80
+ 336 009c 2A4A     		ldr	r2, .L23+20
+ 337 009e A2FB01C0 		umull	ip, r0, r2, r1
+ 338 00a2 C008     		lsrs	r0, r0, #3
+ 339 00a4 8DF80400 		strb	r0, [sp, #4]
+  67:Core/Src/time_keep.c ****         d[2] = seconds / 10; // 秒钟十位
+ 340              		.loc 1 67 9 is_stmt 1 view .LVU81
+  67:Core/Src/time_keep.c ****         d[2] = seconds / 10; // 秒钟十位
+ 341              		.loc 1 67 14 is_stmt 0 view .LVU82
+ 342 00a8 00EB8000 		add	r0, r0, r0, lsl #2
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 9
+
+
+ 343 00ac 4FEA400C 		lsl	ip, r0, #1
+ 344 00b0 A1EB0C01 		sub	r1, r1, ip
+ 345              	.LVL29:
+  67:Core/Src/time_keep.c ****         d[2] = seconds / 10; // 秒钟十位
+ 346              		.loc 1 67 14 view .LVU83
+ 347 00b4 8DF80510 		strb	r1, [sp, #5]
+  68:Core/Src/time_keep.c ****         d[3] = seconds % 10; // 秒钟个位
+ 348              		.loc 1 68 9 is_stmt 1 view .LVU84
+  68:Core/Src/time_keep.c ****         d[3] = seconds % 10; // 秒钟个位
+ 349              		.loc 1 68 14 is_stmt 0 view .LVU85
+ 350 00b8 A2FB0312 		umull	r1, r2, r2, r3
+ 351 00bc D208     		lsrs	r2, r2, #3
+ 352 00be 8DF80620 		strb	r2, [sp, #6]
+  69:Core/Src/time_keep.c ****         flag = 2;
+ 353              		.loc 1 69 9 is_stmt 1 view .LVU86
+  69:Core/Src/time_keep.c ****         flag = 2;
+ 354              		.loc 1 69 14 is_stmt 0 view .LVU87
+ 355 00c2 02EB8202 		add	r2, r2, r2, lsl #2
+ 356 00c6 5100     		lsls	r1, r2, #1
+ 357 00c8 5B1A     		subs	r3, r3, r1
+ 358              	.LVL30:
+  69:Core/Src/time_keep.c ****         flag = 2;
+ 359              		.loc 1 69 14 view .LVU88
+ 360 00ca 8DF80730 		strb	r3, [sp, #7]
+  70:Core/Src/time_keep.c ****     }
+ 361              		.loc 1 70 9 is_stmt 1 view .LVU89
+ 362              	.LVL31:
+  70:Core/Src/time_keep.c ****     }
+ 363              		.loc 1 70 14 is_stmt 0 view .LVU90
+ 364 00ce 0221     		movs	r1, #2
+ 365              	.LBE8:
+ 366 00d0 CCE7     		b	.L18
+ 367              	.LVL32:
+ 368              	.L19:
+ 369              	.LBB9:
+  74:Core/Src/time_keep.c ****         uint8_t hours = totalMinutes / 60; // 小时数
+ 370              		.loc 1 74 9 is_stmt 1 view .LVU91
+  74:Core/Src/time_keep.c ****         uint8_t hours = totalMinutes / 60; // 小时数
+ 371              		.loc 1 74 45 is_stmt 0 view .LVU92
+ 372 00d2 1A4A     		ldr	r2, .L23+8
+ 373 00d4 A2FB0323 		umull	r2, r3, r2, r3
+  74:Core/Src/time_keep.c ****         uint8_t hours = totalMinutes / 60; // 小时数
+ 374              		.loc 1 74 18 view .LVU93
+ 375 00d8 C3F38F33 		ubfx	r3, r3, #14, #16
+ 376              	.LVL33:
+  75:Core/Src/time_keep.c ****         if (hours > 99)
+ 377              		.loc 1 75 9 is_stmt 1 view .LVU94
+  75:Core/Src/time_keep.c ****         if (hours > 99)
+ 378              		.loc 1 75 17 is_stmt 0 view .LVU95
+ 379 00dc 1C49     		ldr	r1, .L23+28
+ 380 00de A1FB0321 		umull	r2, r1, r1, r3
+ 381 00e2 C1F34711 		ubfx	r1, r1, #5, #8
+ 382              	.LVL34:
+  76:Core/Src/time_keep.c ****             hours = 99;                      // 最大99小时
+ 383              		.loc 1 76 9 is_stmt 1 view .LVU96
+  76:Core/Src/time_keep.c ****             hours = 99;                      // 最大99小时
+ 384              		.loc 1 76 12 is_stmt 0 view .LVU97
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 10
+
+
+ 385 00e6 6329     		cmp	r1, #99
+ 386 00e8 00D9     		bls	.L20
+  77:Core/Src/time_keep.c ****         uint8_t minutes = totalMinutes % 60; // 分钟
+ 387              		.loc 1 77 19 view .LVU98
+ 388 00ea 6321     		movs	r1, #99
+ 389              	.LVL35:
+ 390              	.L20:
+  78:Core/Src/time_keep.c **** 
+ 391              		.loc 1 78 9 is_stmt 1 view .LVU99
+  78:Core/Src/time_keep.c **** 
+ 392              		.loc 1 78 17 is_stmt 0 view .LVU100
+ 393 00ec 184A     		ldr	r2, .L23+28
+ 394 00ee A2FB0302 		umull	r0, r2, r2, r3
+ 395 00f2 5209     		lsrs	r2, r2, #5
+ 396 00f4 C2EB0212 		rsb	r2, r2, r2, lsl #4
+ 397 00f8 9000     		lsls	r0, r2, #2
+ 398 00fa 1B1A     		subs	r3, r3, r0
+ 399              	.LVL36:
+  78:Core/Src/time_keep.c **** 
+ 400              		.loc 1 78 17 view .LVU101
+ 401 00fc DBB2     		uxtb	r3, r3
+ 402              	.LVL37:
+  80:Core/Src/time_keep.c ****         d[1] = hours % 10;   // 小时个位
+ 403              		.loc 1 80 9 is_stmt 1 view .LVU102
+  80:Core/Src/time_keep.c ****         d[1] = hours % 10;   // 小时个位
+ 404              		.loc 1 80 14 is_stmt 0 view .LVU103
+ 405 00fe 124A     		ldr	r2, .L23+20
+ 406 0100 A2FB01C0 		umull	ip, r0, r2, r1
+ 407 0104 C008     		lsrs	r0, r0, #3
+ 408 0106 8DF80400 		strb	r0, [sp, #4]
+  81:Core/Src/time_keep.c ****         d[2] = minutes / 10; // 分钟十位
+ 409              		.loc 1 81 9 is_stmt 1 view .LVU104
+  81:Core/Src/time_keep.c ****         d[2] = minutes / 10; // 分钟十位
+ 410              		.loc 1 81 14 is_stmt 0 view .LVU105
+ 411 010a 00EB8000 		add	r0, r0, r0, lsl #2
+ 412 010e 4FEA400C 		lsl	ip, r0, #1
+ 413 0112 A1EB0C01 		sub	r1, r1, ip
+ 414              	.LVL38:
+  81:Core/Src/time_keep.c ****         d[2] = minutes / 10; // 分钟十位
+ 415              		.loc 1 81 14 view .LVU106
+ 416 0116 8DF80510 		strb	r1, [sp, #5]
+  82:Core/Src/time_keep.c ****         d[3] = minutes % 10; // 分钟个位
+ 417              		.loc 1 82 9 is_stmt 1 view .LVU107
+  82:Core/Src/time_keep.c ****         d[3] = minutes % 10; // 分钟个位
+ 418              		.loc 1 82 14 is_stmt 0 view .LVU108
+ 419 011a A2FB0312 		umull	r1, r2, r2, r3
+ 420 011e D208     		lsrs	r2, r2, #3
+ 421 0120 8DF80620 		strb	r2, [sp, #6]
+  83:Core/Src/time_keep.c ****         flag = 3;
+ 422              		.loc 1 83 9 is_stmt 1 view .LVU109
+  83:Core/Src/time_keep.c ****         flag = 3;
+ 423              		.loc 1 83 14 is_stmt 0 view .LVU110
+ 424 0124 02EB8202 		add	r2, r2, r2, lsl #2
+ 425 0128 5100     		lsls	r1, r2, #1
+ 426 012a 5B1A     		subs	r3, r3, r1
+ 427              	.LVL39:
+  83:Core/Src/time_keep.c ****         flag = 3;
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 11
+
+
+ 428              		.loc 1 83 14 view .LVU111
+ 429 012c 8DF80730 		strb	r3, [sp, #7]
+  84:Core/Src/time_keep.c ****     }
+ 430              		.loc 1 84 9 is_stmt 1 view .LVU112
+ 431              	.LVL40:
+  84:Core/Src/time_keep.c ****     }
+ 432              		.loc 1 84 14 is_stmt 0 view .LVU113
+ 433 0130 0321     		movs	r1, #3
+ 434 0132 9BE7     		b	.L18
+ 435              	.L24:
+ 436              		.align	2
+ 437              	.L23:
+ 438 0134 00000000 		.word	elapsedTime
+ 439 0138 BF270900 		.word	599999
+ 440 013c 73B2E745 		.word	1172812403
+ 441 0140 D34D6210 		.word	274877907
+ 442 0144 1F85EB51 		.word	1374389535
+ 443 0148 CDCCCCCC 		.word	-858993459
+ 444 014c 80EE3600 		.word	3600000
+ 445 0150 89888888 		.word	-2004318071
+ 446              	.LBE9:
+ 447              		.cfi_endproc
+ 448              	.LFE67:
+ 450              		.section	.text.setting_time_keep,"ax",%progbits
+ 451              		.align	1
+ 452              		.global	setting_time_keep
+ 453              		.syntax unified
+ 454              		.thumb
+ 455              		.thumb_func
+ 457              	setting_time_keep:
+ 458              	.LVL41:
+ 459              	.LFB68:
+  89:Core/Src/time_keep.c **** 
+  90:Core/Src/time_keep.c **** void setting_time_keep(uint16_t GPIO_Pin)
+  91:Core/Src/time_keep.c **** {
+ 460              		.loc 1 91 1 is_stmt 1 view -0
+ 461              		.cfi_startproc
+ 462              		@ args = 0, pretend = 0, frame = 0
+ 463              		@ frame_needed = 0, uses_anonymous_args = 0
+ 464              		@ link register save eliminated.
+  92:Core/Src/time_keep.c ****     // 消抖：200ms内不重复响应
+  93:Core/Src/time_keep.c ****     if (GPIO_Pin == BUTTON_INTERRUPT_1_Pin)
+ 465              		.loc 1 93 5 view .LVU115
+ 466              		.loc 1 93 8 is_stmt 0 view .LVU116
+ 467 0000 0128     		cmp	r0, #1
+ 468 0002 02D0     		beq	.L28
+  94:Core/Src/time_keep.c ****     {
+  95:Core/Src/time_keep.c ****         elapsedTime = 0; // 清零计时
+  96:Core/Src/time_keep.c ****         isTiming = 0;    // 暂停计时
+  97:Core/Src/time_keep.c ****     }
+  98:Core/Src/time_keep.c ****     else if (GPIO_Pin == BUTTON_INTERRUPT_2_Pin)
+ 469              		.loc 1 98 10 is_stmt 1 view .LVU117
+ 470              		.loc 1 98 13 is_stmt 0 view .LVU118
+ 471 0004 8028     		cmp	r0, #128
+ 472 0006 06D0     		beq	.L29
+ 473              	.L25:
+  99:Core/Src/time_keep.c ****     {
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 12
+
+
+ 100:Core/Src/time_keep.c ****         isTiming = !isTiming; // 开始 / 暂停 计时
+ 101:Core/Src/time_keep.c ****     }
+ 102:Core/Src/time_keep.c **** }...
+ 474              		.loc 1 102 1 view .LVU119
+ 475 0008 7047     		bx	lr
+ 476              	.L28:
+  95:Core/Src/time_keep.c ****         elapsedTime = 0; // 清零计时
+ 477              		.loc 1 95 9 is_stmt 1 view .LVU120
+  95:Core/Src/time_keep.c ****         elapsedTime = 0; // 清零计时
+ 478              		.loc 1 95 21 is_stmt 0 view .LVU121
+ 479 000a 0023     		movs	r3, #0
+ 480 000c 054A     		ldr	r2, .L30
+ 481 000e 1360     		str	r3, [r2]
+  96:Core/Src/time_keep.c ****         isTiming = 0;    // 暂停计时
+ 482              		.loc 1 96 9 is_stmt 1 view .LVU122
+  96:Core/Src/time_keep.c ****         isTiming = 0;    // 暂停计时
+ 483              		.loc 1 96 18 is_stmt 0 view .LVU123
+ 484 0010 054A     		ldr	r2, .L30+4
+ 485 0012 1370     		strb	r3, [r2]
+ 486 0014 7047     		bx	lr
+ 487              	.L29:
+ 100:Core/Src/time_keep.c ****         isTiming = !isTiming; // 开始 / 暂停 计时
+ 488              		.loc 1 100 9 is_stmt 1 view .LVU124
+ 100:Core/Src/time_keep.c ****         isTiming = !isTiming; // 开始 / 暂停 计时
+ 489              		.loc 1 100 20 is_stmt 0 view .LVU125
+ 490 0016 044A     		ldr	r2, .L30+4
+ 491 0018 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 492 001a B3FA83F3 		clz	r3, r3
+ 493 001e 5B09     		lsrs	r3, r3, #5
+ 100:Core/Src/time_keep.c ****         isTiming = !isTiming; // 开始 / 暂停 计时
+ 494              		.loc 1 100 18 view .LVU126
+ 495 0020 1370     		strb	r3, [r2]
+ 496              		.loc 1 102 1 view .LVU127
+ 497 0022 F1E7     		b	.L25
+ 498              	.L31:
+ 499              		.align	2
+ 500              	.L30:
+ 501 0024 00000000 		.word	elapsedTime
+ 502 0028 00000000 		.word	isTiming
+ 503              		.cfi_endproc
+ 504              	.LFE68:
+ 506              		.global	isTiming
+ 507              		.section	.bss.isTiming,"aw",%nobits
+ 510              	isTiming:
+ 511 0000 00       		.space	1
+ 512              		.global	elapsedTime
+ 513              		.section	.bss.elapsedTime,"aw",%nobits
+ 514              		.align	2
+ 517              	elapsedTime:
+ 518 0000 00000000 		.space	4
+ 519              		.text
+ 520              	.Letext0:
+ 521              		.file 2 "D:/arm-none-eabi-gcc/arm-none-eabi/include/machine/_default_types.h"
+ 522              		.file 3 "D:/arm-none-eabi-gcc/arm-none-eabi/include/sys/_stdint.h"
+ 523              		.file 4 "Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h"
+ 524              		.file 5 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h"
+ 525              		.file 6 "Core/Inc/time_keep.h"
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 13
+
+
+ 526              		.file 7 "Core/Inc/main.h"
+ 527              		.file 8 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h"
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s 			page 14
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 time_keep.c
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:19     .text.addElapsedTime:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:25     .text.addElapsedTime:00000000 addElapsedTime
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:43     .text.addElapsedTime:0000000c $d
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:517    .bss.elapsedTime:00000000 elapsedTime
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:48     .text.display_time_keep:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:54     .text.display_time_keep:00000000 display_time_keep
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:192    .text.display_time_keep:0000008c $d
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:201    .text.run_time_keep:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:207    .text.run_time_keep:00000000 run_time_keep
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:438    .text.run_time_keep:00000134 $d
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:451    .text.setting_time_keep:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:457    .text.setting_time_keep:00000000 setting_time_keep
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:501    .text.setting_time_keep:00000024 $d
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:510    .bss.isTiming:00000000 isTiming
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:511    .bss.isTiming:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccoTl8Ge.s:514    .bss.elapsedTime:00000000 $d
+
+UNDEFINED SYMBOLS
+HAL_GPIO_WritePin
+HAL_Delay
+LED_ARR
+DIGIT_COUNT
+DIGIT_ARR
+segment_code

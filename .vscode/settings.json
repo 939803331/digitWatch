@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "ssd1306_fonts.h": "c",
+        "ssd1306.h": "c",
+        "stm32f1xx_hal.h": "c",
+        "fonts.h": "c",
+        "stdio.h": "c",
+        "limits": "c",
+        "main.h": "c",
+        "stm32f1xx_hal_conf.h": "c",
+        "gpio.h": "c",
+        "winapifamily.h": "c",
+        "math.h": "c",
+        "time_keep.h": "c",
+        "clock_keep.h": "c",
+        "countdown.h": "c"
+    }
+}

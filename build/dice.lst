@@ -1,0 +1,1370 @@
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 1
+
+
+   1              		.cpu cortex-m3
+   2              		.arch armv7-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"dice.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Core/Src/dice.c"
+  18              		.section	.text.display_dice,"ax",%progbits
+  19              		.align	1
+  20              		.global	display_dice
+  21              		.syntax unified
+  22              		.thumb
+  23              		.thumb_func
+  25              	display_dice:
+  26              	.LVL0:
+  27              	.LFB65:
+   1:Core/Src/dice.c **** #include "dice.h"
+   2:Core/Src/dice.c **** #include "main.h"
+   3:Core/Src/dice.c **** #include <stdlib.h>
+   4:Core/Src/dice.c **** 
+   5:Core/Src/dice.c **** typedef enum
+   6:Core/Src/dice.c **** {
+   7:Core/Src/dice.c ****     STATE_SETTING, // 正在设置每一位数码管的数字（默认初值为6）
+   8:Core/Src/dice.c ****     STATE_READY,   // 设置完毕，等待开始摇骰子
+   9:Core/Src/dice.c ****     STATE_ROLLING, // 摇骰子中，随机生成数字（显示过程从左至右，每位固定�
+  10:Core/Src/dice.c ****     STATE_FINISHED // 摇骰子结束，所有位数字固定显示
+  11:Core/Src/dice.c **** } SystemState;
+  12:Core/Src/dice.c **** 
+  13:Core/Src/dice.c **** volatile SystemState systemState = STATE_READY;
+  14:Core/Src/dice.c **** 
+  15:Core/Src/dice.c **** // 用于设置的4位初始数字，默认全为6
+  16:Core/Src/dice.c **** volatile uint8_t setDigits[4] = {6, 6, 6, 6};
+  17:Core/Src/dice.c **** volatile uint8_t currentSettingIndex = 0; // 当前正在设置哪一位（0～3）
+  18:Core/Src/dice.c **** 
+  19:Core/Src/dice.c **** // 摇骰子过程中用到的变量
+  20:Core/Src/dice.c **** uint8_t finalDigits[4] = {0};    // 摇骰子最终确定的数字（随机范围 0 ~ setDigits[i]�
+  21:Core/Src/dice.c **** uint8_t currentDisplay[4] = {0}; // 当前各位显示的数字（实时更新）
+  22:Core/Src/dice.c **** uint32_t rollStartTime = 0;      // 摇骰子开始的时间
+  23:Core/Src/dice.c **** uint8_t fixedCount = 0;          // 已固定的位数（从左往右依次固定）
+  24:Core/Src/dice.c **** 
+  25:Core/Src/dice.c **** // 用于闪烁设置数字时的定时变量（例如 500ms 闪烁一次）
+  26:Core/Src/dice.c **** volatile uint8_t blinkFlag = 0;
+  27:Core/Src/dice.c **** 
+  28:Core/Src/dice.c **** void display_dice(uint8_t d[4])
+  29:Core/Src/dice.c **** {
+  28              		.loc 1 29 1 view -0
+  29              		.cfi_startproc
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 2
+
+
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		.loc 1 29 1 is_stmt 0 view .LVU1
+  33 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+  34              	.LCFI0:
+  35              		.cfi_def_cfa_offset 24
+  36              		.cfi_offset 3, -24
+  37              		.cfi_offset 4, -20
+  38              		.cfi_offset 5, -16
+  39              		.cfi_offset 6, -12
+  40              		.cfi_offset 7, -8
+  41              		.cfi_offset 14, -4
+  42 0002 0746     		mov	r7, r0
+  30:Core/Src/dice.c ****     // 将 d 分别显示到 4 位共阴数码管上
+  31:Core/Src/dice.c ****     for (uint8_t i = 0; i < DIGIT_COUNT; i++)
+  43              		.loc 1 31 5 is_stmt 1 view .LVU2
+  44              	.LBB2:
+  45              		.loc 1 31 10 view .LVU3
+  46              	.LVL1:
+  47              		.loc 1 31 18 is_stmt 0 view .LVU4
+  48 0004 0026     		movs	r6, #0
+  49              		.loc 1 31 5 view .LVU5
+  50 0006 12E0     		b	.L2
+  51              	.LVL2:
+  52              	.L4:
+  53              	.LBB3:
+  54              	.LBB4:
+  32:Core/Src/dice.c ****     {
+  33:Core/Src/dice.c ****         HAL_GPIO_WritePin(GPIOA, DIGIT_1_Pin | DIGIT_2_Pin | DIGIT_3_Pin | DIGIT_4_Pin, GPIO_PIN_SE
+  34:Core/Src/dice.c **** 
+  35:Core/Src/dice.c ****         HAL_GPIO_WritePin(GPIOA, DIGIT_ARR[i], GPIO_PIN_RESET);
+  36:Core/Src/dice.c **** 
+  37:Core/Src/dice.c ****         uint8_t code = segment_code[d[i]];
+  38:Core/Src/dice.c ****         for (uint8_t j = 0; j < 7; j++)
+  39:Core/Src/dice.c ****         {
+  40:Core/Src/dice.c ****             HAL_GPIO_WritePin(GPIOA, LED_ARR[j], ((code >> j) & 0x01) ? GPIO_PIN_SET : GPIO_PIN_RES
+  55              		.loc 1 40 13 is_stmt 1 view .LVU6
+  56              		.loc 1 40 57 is_stmt 0 view .LVU7
+  57 0008 45FA04F2 		asr	r2, r5, r4
+  58              		.loc 1 40 13 view .LVU8
+  59 000c 02F00102 		and	r2, r2, #1
+  60 0010 134B     		ldr	r3, .L8
+  61 0012 33F81410 		ldrh	r1, [r3, r4, lsl #1]
+  62 0016 1348     		ldr	r0, .L8+4
+  63 0018 FFF7FEFF 		bl	HAL_GPIO_WritePin
+  64              	.LVL3:
+  38:Core/Src/dice.c ****         {
+  65              		.loc 1 38 37 is_stmt 1 discriminator 3 view .LVU9
+  66 001c 0134     		adds	r4, r4, #1
+  67              	.LVL4:
+  38:Core/Src/dice.c ****         {
+  68              		.loc 1 38 37 is_stmt 0 discriminator 3 view .LVU10
+  69 001e E4B2     		uxtb	r4, r4
+  70              	.LVL5:
+  71              	.L3:
+  38:Core/Src/dice.c ****         {
+  72              		.loc 1 38 31 is_stmt 1 discriminator 1 view .LVU11
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 3
+
+
+  73 0020 062C     		cmp	r4, #6
+  74 0022 F1D9     		bls	.L4
+  75              	.LBE4:
+  41:Core/Src/dice.c ****         }
+  42:Core/Src/dice.c **** 
+  43:Core/Src/dice.c ****         HAL_Delay(2);
+  76              		.loc 1 43 9 view .LVU12
+  77 0024 0220     		movs	r0, #2
+  78 0026 FFF7FEFF 		bl	HAL_Delay
+  79              	.LVL6:
+  80              	.LBE3:
+  31:Core/Src/dice.c ****     {
+  81              		.loc 1 31 43 discriminator 2 view .LVU13
+  82 002a 0136     		adds	r6, r6, #1
+  83              	.LVL7:
+  31:Core/Src/dice.c ****     {
+  84              		.loc 1 31 43 is_stmt 0 discriminator 2 view .LVU14
+  85 002c F6B2     		uxtb	r6, r6
+  86              	.LVL8:
+  87              	.L2:
+  31:Core/Src/dice.c ****     {
+  88              		.loc 1 31 27 is_stmt 1 discriminator 1 view .LVU15
+  89 002e 0E4B     		ldr	r3, .L8+8
+  90 0030 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  91 0032 B342     		cmp	r3, r6
+  92 0034 12D9     		bls	.L7
+  93              	.LBB6:
+  33:Core/Src/dice.c **** 
+  94              		.loc 1 33 9 view .LVU16
+  95 0036 0B4C     		ldr	r4, .L8+4
+  96 0038 0122     		movs	r2, #1
+  97 003a 48F24061 		movw	r1, #34368
+  98 003e 2046     		mov	r0, r4
+  99 0040 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 100              	.LVL9:
+  35:Core/Src/dice.c **** 
+ 101              		.loc 1 35 9 view .LVU17
+ 102 0044 0022     		movs	r2, #0
+ 103 0046 094B     		ldr	r3, .L8+12
+ 104 0048 33F81610 		ldrh	r1, [r3, r6, lsl #1]
+ 105 004c 2046     		mov	r0, r4
+ 106 004e FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 107              	.LVL10:
+  37:Core/Src/dice.c ****         for (uint8_t j = 0; j < 7; j++)
+ 108              		.loc 1 37 9 view .LVU18
+  37:Core/Src/dice.c ****         for (uint8_t j = 0; j < 7; j++)
+ 109              		.loc 1 37 38 is_stmt 0 view .LVU19
+ 110 0052 BB5D     		ldrb	r3, [r7, r6]	@ zero_extendqisi2
+  37:Core/Src/dice.c ****         for (uint8_t j = 0; j < 7; j++)
+ 111              		.loc 1 37 17 view .LVU20
+ 112 0054 064A     		ldr	r2, .L8+16
+ 113 0056 D55C     		ldrb	r5, [r2, r3]	@ zero_extendqisi2
+ 114              	.LVL11:
+  38:Core/Src/dice.c ****         {
+ 115              		.loc 1 38 9 is_stmt 1 view .LVU21
+ 116              	.LBB5:
+  38:Core/Src/dice.c ****         {
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 4
+
+
+ 117              		.loc 1 38 14 view .LVU22
+  38:Core/Src/dice.c ****         {
+ 118              		.loc 1 38 22 is_stmt 0 view .LVU23
+ 119 0058 0024     		movs	r4, #0
+  38:Core/Src/dice.c ****         {
+ 120              		.loc 1 38 9 view .LVU24
+ 121 005a E1E7     		b	.L3
+ 122              	.LVL12:
+ 123              	.L7:
+  38:Core/Src/dice.c ****         {
+ 124              		.loc 1 38 9 view .LVU25
+ 125              	.LBE5:
+ 126              	.LBE6:
+ 127              	.LBE2:
+  44:Core/Src/dice.c ****     }
+  45:Core/Src/dice.c **** }
+ 128              		.loc 1 45 1 view .LVU26
+ 129 005c F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 130              	.LVL13:
+ 131              	.L9:
+ 132              		.loc 1 45 1 view .LVU27
+ 133 005e 00BF     		.align	2
+ 134              	.L8:
+ 135 0060 00000000 		.word	LED_ARR
+ 136 0064 00080140 		.word	1073809408
+ 137 0068 00000000 		.word	DIGIT_COUNT
+ 138 006c 00000000 		.word	DIGIT_ARR
+ 139 0070 00000000 		.word	segment_code
+ 140              		.cfi_endproc
+ 141              	.LFE65:
+ 143              		.section	.text.blink_control_dice,"ax",%progbits
+ 144              		.align	1
+ 145              		.global	blink_control_dice
+ 146              		.syntax unified
+ 147              		.thumb
+ 148              		.thumb_func
+ 150              	blink_control_dice:
+ 151              	.LFB67:
+  46:Core/Src/dice.c **** 
+  47:Core/Src/dice.c **** void run_dice()
+  48:Core/Src/dice.c **** {
+  49:Core/Src/dice.c ****     // 根据状态处理摇骰子流程
+  50:Core/Src/dice.c ****     if (systemState == STATE_ROLLING)
+  51:Core/Src/dice.c ****     {
+  52:Core/Src/dice.c ****         process_rolling();
+  53:Core/Src/dice.c ****     }
+  54:Core/Src/dice.c **** 
+  55:Core/Src/dice.c ****     uint8_t d[4] = {0};
+  56:Core/Src/dice.c **** 
+  57:Core/Src/dice.c ****     if (systemState == STATE_SETTING)
+  58:Core/Src/dice.c ****     {
+  59:Core/Src/dice.c ****         // 设置状态下，当前设置位闪烁
+  60:Core/Src/dice.c ****         for (uint8_t i = 0; i < 4; i++)
+  61:Core/Src/dice.c ****         {
+  62:Core/Src/dice.c ****             if (i == currentSettingIndex && blinkFlag)
+  63:Core/Src/dice.c ****             {
+  64:Core/Src/dice.c ****                 // 正在设置的位不显示（闪烁）
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 5
+
+
+  65:Core/Src/dice.c ****                 currentDisplay[i] = 10;
+  66:Core/Src/dice.c ****             }
+  67:Core/Src/dice.c ****             else
+  68:Core/Src/dice.c ****             {
+  69:Core/Src/dice.c ****                 currentDisplay[i] = setDigits[i];
+  70:Core/Src/dice.c ****             }
+  71:Core/Src/dice.c ****         }
+  72:Core/Src/dice.c ****         d[0] = currentDisplay[0];
+  73:Core/Src/dice.c ****         d[1] = currentDisplay[1];
+  74:Core/Src/dice.c ****         d[2] = currentDisplay[2];
+  75:Core/Src/dice.c ****         d[3] = currentDisplay[3];
+  76:Core/Src/dice.c ****     }
+  77:Core/Src/dice.c ****     else if (systemState == STATE_ROLLING)
+  78:Core/Src/dice.c ****     {
+  79:Core/Src/dice.c ****         // 摇骰子状态下：左边已固定的位显示最终数字，
+  80:Core/Src/dice.c ****         // 其余位持续更新随机数字（更新速率可调）
+  81:Core/Src/dice.c ****         for (uint8_t i = 0; i < fixedCount; i++)
+  82:Core/Src/dice.c ****         {
+  83:Core/Src/dice.c ****             currentDisplay[i] = finalDigits[i]; // 已固定
+  84:Core/Src/dice.c ****         }
+  85:Core/Src/dice.c ****         // 对未固定位，快速循环显示0~9（你可以改为生成随机数）
+  86:Core/Src/dice.c ****         for (uint8_t i = fixedCount; i < 4; i++)
+  87:Core/Src/dice.c ****         {
+  88:Core/Src/dice.c ****             currentDisplay[i] = rand() % 10;
+  89:Core/Src/dice.c ****         }
+  90:Core/Src/dice.c ****         d[0] = currentDisplay[0];
+  91:Core/Src/dice.c ****         d[1] = currentDisplay[1];
+  92:Core/Src/dice.c ****         d[2] = currentDisplay[2];
+  93:Core/Src/dice.c ****         d[3] = currentDisplay[3];
+  94:Core/Src/dice.c ****     }
+  95:Core/Src/dice.c ****     else if (systemState == STATE_FINISHED)
+  96:Core/Src/dice.c ****     {
+  97:Core/Src/dice.c ****         // 摇骰子结束后，全部显示固定数字
+  98:Core/Src/dice.c ****         d[0] = finalDigits[0];
+  99:Core/Src/dice.c ****         d[1] = finalDigits[1];
+ 100:Core/Src/dice.c ****         d[2] = finalDigits[2];
+ 101:Core/Src/dice.c ****         d[3] = finalDigits[3];
+ 102:Core/Src/dice.c ****     }
+ 103:Core/Src/dice.c ****     else
+ 104:Core/Src/dice.c ****     { // STATE_READY，显示设置好的数字
+ 105:Core/Src/dice.c ****         d[0] = setDigits[0];
+ 106:Core/Src/dice.c ****         d[1] = setDigits[1];
+ 107:Core/Src/dice.c ****         d[2] = setDigits[2];
+ 108:Core/Src/dice.c ****         d[3] = setDigits[3];
+ 109:Core/Src/dice.c ****     }
+ 110:Core/Src/dice.c **** 
+ 111:Core/Src/dice.c ****     display_dice(d);
+ 112:Core/Src/dice.c **** 
+ 113:Core/Src/dice.c ****     // 闪烁
+ 114:Core/Src/dice.c ****     blink_control_dice();
+ 115:Core/Src/dice.c **** }
+ 116:Core/Src/dice.c **** 
+ 117:Core/Src/dice.c **** void blink_control_dice()
+ 118:Core/Src/dice.c **** {
+ 152              		.loc 1 118 1 is_stmt 1 view -0
+ 153              		.cfi_startproc
+ 154              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 6
+
+
+ 155              		@ frame_needed = 0, uses_anonymous_args = 0
+ 156 0000 08B5     		push	{r3, lr}
+ 157              	.LCFI1:
+ 158              		.cfi_def_cfa_offset 8
+ 159              		.cfi_offset 3, -8
+ 160              		.cfi_offset 14, -4
+ 119:Core/Src/dice.c ****     static uint32_t diceLastBlinkTime = 0;
+ 161              		.loc 1 119 5 view .LVU29
+ 120:Core/Src/dice.c ****     if (HAL_GetTick() - diceLastBlinkTime >= 500)
+ 162              		.loc 1 120 5 view .LVU30
+ 163              		.loc 1 120 9 is_stmt 0 view .LVU31
+ 164 0002 FFF7FEFF 		bl	HAL_GetTick
+ 165              	.LVL14:
+ 166              		.loc 1 120 23 discriminator 1 view .LVU32
+ 167 0006 094B     		ldr	r3, .L14
+ 168 0008 1B68     		ldr	r3, [r3]
+ 169 000a C01A     		subs	r0, r0, r3
+ 170              		.loc 1 120 8 discriminator 1 view .LVU33
+ 171 000c B0F5FA7F 		cmp	r0, #500
+ 172 0010 00D2     		bcs	.L13
+ 173              	.L10:
+ 121:Core/Src/dice.c ****     {
+ 122:Core/Src/dice.c ****         blinkFlag = !blinkFlag; // 切换闪烁状态
+ 123:Core/Src/dice.c ****         diceLastBlinkTime = HAL_GetTick();
+ 124:Core/Src/dice.c ****     }
+ 125:Core/Src/dice.c **** }
+ 174              		.loc 1 125 1 view .LVU34
+ 175 0012 08BD     		pop	{r3, pc}
+ 176              	.L13:
+ 122:Core/Src/dice.c ****         diceLastBlinkTime = HAL_GetTick();
+ 177              		.loc 1 122 9 is_stmt 1 view .LVU35
+ 122:Core/Src/dice.c ****         diceLastBlinkTime = HAL_GetTick();
+ 178              		.loc 1 122 21 is_stmt 0 view .LVU36
+ 179 0014 064A     		ldr	r2, .L14+4
+ 180 0016 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 181 0018 B3FA83F3 		clz	r3, r3
+ 182 001c 5B09     		lsrs	r3, r3, #5
+ 122:Core/Src/dice.c ****         diceLastBlinkTime = HAL_GetTick();
+ 183              		.loc 1 122 19 view .LVU37
+ 184 001e 1370     		strb	r3, [r2]
+ 123:Core/Src/dice.c ****     }
+ 185              		.loc 1 123 9 is_stmt 1 view .LVU38
+ 123:Core/Src/dice.c ****     }
+ 186              		.loc 1 123 29 is_stmt 0 view .LVU39
+ 187 0020 FFF7FEFF 		bl	HAL_GetTick
+ 188              	.LVL15:
+ 123:Core/Src/dice.c ****     }
+ 189              		.loc 1 123 27 discriminator 1 view .LVU40
+ 190 0024 014B     		ldr	r3, .L14
+ 191 0026 1860     		str	r0, [r3]
+ 192              		.loc 1 125 1 view .LVU41
+ 193 0028 F3E7     		b	.L10
+ 194              	.L15:
+ 195 002a 00BF     		.align	2
+ 196              	.L14:
+ 197 002c 00000000 		.word	diceLastBlinkTime.0
+ 198 0030 00000000 		.word	blinkFlag
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 7
+
+
+ 199              		.cfi_endproc
+ 200              	.LFE67:
+ 202              		.section	.text.setting_dice,"ax",%progbits
+ 203              		.align	1
+ 204              		.global	setting_dice
+ 205              		.syntax unified
+ 206              		.thumb
+ 207              		.thumb_func
+ 209              	setting_dice:
+ 210              	.LVL16:
+ 211              	.LFB68:
+ 126:Core/Src/dice.c **** 
+ 127:Core/Src/dice.c **** void setting_dice(uint16_t GPIO_Pin)
+ 128:Core/Src/dice.c **** {
+ 212              		.loc 1 128 1 is_stmt 1 view -0
+ 213              		.cfi_startproc
+ 214              		@ args = 0, pretend = 0, frame = 0
+ 215              		@ frame_needed = 0, uses_anonymous_args = 0
+ 129:Core/Src/dice.c ****     if (GPIO_Pin == BUTTON_INTERRUPT_1_Pin)
+ 216              		.loc 1 129 5 view .LVU43
+ 217              		.loc 1 129 8 is_stmt 0 view .LVU44
+ 218 0000 0128     		cmp	r0, #1
+ 219 0002 02D0     		beq	.L29
+ 130:Core/Src/dice.c ****     {
+ 131:Core/Src/dice.c ****         if (systemState == STATE_SETTING)
+ 132:Core/Src/dice.c ****         {
+ 133:Core/Src/dice.c ****             // 保存当前位的设置，并切换至下一位
+ 134:Core/Src/dice.c ****             if (currentSettingIndex < 3)
+ 135:Core/Src/dice.c ****             {
+ 136:Core/Src/dice.c ****                 currentSettingIndex++;
+ 137:Core/Src/dice.c ****             }
+ 138:Core/Src/dice.c ****             else
+ 139:Core/Src/dice.c ****             {
+ 140:Core/Src/dice.c ****                 // 所有位设置完毕，进入 READY 状态
+ 141:Core/Src/dice.c ****                 systemState = STATE_READY;
+ 142:Core/Src/dice.c ****                 currentSettingIndex = 0;
+ 143:Core/Src/dice.c ****             }
+ 144:Core/Src/dice.c ****         }
+ 145:Core/Src/dice.c ****         else if (systemState == STATE_READY)
+ 146:Core/Src/dice.c ****         {
+ 147:Core/Src/dice.c ****             // 进入设置状态
+ 148:Core/Src/dice.c ****             systemState = STATE_SETTING;
+ 149:Core/Src/dice.c ****         }
+ 150:Core/Src/dice.c ****     }
+ 151:Core/Src/dice.c ****     else if (GPIO_Pin == BUTTON_INTERRUPT_2_Pin)
+ 220              		.loc 1 151 10 is_stmt 1 view .LVU45
+ 221              		.loc 1 151 13 is_stmt 0 view .LVU46
+ 222 0004 8028     		cmp	r0, #128
+ 223 0006 1CD0     		beq	.L30
+ 224              	.L26:
+ 225 0008 7047     		bx	lr
+ 226              	.L29:
+ 131:Core/Src/dice.c ****         {
+ 227              		.loc 1 131 9 is_stmt 1 view .LVU47
+ 131:Core/Src/dice.c ****         {
+ 228              		.loc 1 131 25 is_stmt 0 view .LVU48
+ 229 000a 2D4B     		ldr	r3, .L32
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 8
+
+
+ 230 000c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 131:Core/Src/dice.c ****         {
+ 231              		.loc 1 131 12 view .LVU49
+ 232 000e 83B9     		cbnz	r3, .L18
+ 134:Core/Src/dice.c ****             {
+ 233              		.loc 1 134 13 is_stmt 1 view .LVU50
+ 134:Core/Src/dice.c ****             {
+ 234              		.loc 1 134 37 is_stmt 0 view .LVU51
+ 235 0010 2C4B     		ldr	r3, .L32+4
+ 236 0012 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 134:Core/Src/dice.c ****             {
+ 237              		.loc 1 134 16 view .LVU52
+ 238 0014 022B     		cmp	r3, #2
+ 239 0016 05D8     		bhi	.L19
+ 136:Core/Src/dice.c ****             }
+ 240              		.loc 1 136 17 is_stmt 1 view .LVU53
+ 136:Core/Src/dice.c ****             }
+ 241              		.loc 1 136 36 is_stmt 0 view .LVU54
+ 242 0018 2A4A     		ldr	r2, .L32+4
+ 243 001a 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 244 001c 0133     		adds	r3, r3, #1
+ 245 001e DBB2     		uxtb	r3, r3
+ 246 0020 1370     		strb	r3, [r2]
+ 247 0022 7047     		bx	lr
+ 248              	.L19:
+ 141:Core/Src/dice.c ****                 currentSettingIndex = 0;
+ 249              		.loc 1 141 17 is_stmt 1 view .LVU55
+ 141:Core/Src/dice.c ****                 currentSettingIndex = 0;
+ 250              		.loc 1 141 29 is_stmt 0 view .LVU56
+ 251 0024 264B     		ldr	r3, .L32
+ 252 0026 0122     		movs	r2, #1
+ 253 0028 1A70     		strb	r2, [r3]
+ 142:Core/Src/dice.c ****             }
+ 254              		.loc 1 142 17 is_stmt 1 view .LVU57
+ 142:Core/Src/dice.c ****             }
+ 255              		.loc 1 142 37 is_stmt 0 view .LVU58
+ 256 002a 264B     		ldr	r3, .L32+4
+ 257 002c 0022     		movs	r2, #0
+ 258 002e 1A70     		strb	r2, [r3]
+ 259 0030 7047     		bx	lr
+ 260              	.L18:
+ 145:Core/Src/dice.c ****         {
+ 261              		.loc 1 145 14 is_stmt 1 view .LVU59
+ 145:Core/Src/dice.c ****         {
+ 262              		.loc 1 145 30 is_stmt 0 view .LVU60
+ 263 0032 234B     		ldr	r3, .L32
+ 264 0034 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 145:Core/Src/dice.c ****         {
+ 265              		.loc 1 145 17 view .LVU61
+ 266 0036 012B     		cmp	r3, #1
+ 267 0038 E6D1     		bne	.L26
+ 148:Core/Src/dice.c ****         }
+ 268              		.loc 1 148 13 is_stmt 1 view .LVU62
+ 148:Core/Src/dice.c ****         }
+ 269              		.loc 1 148 25 is_stmt 0 view .LVU63
+ 270 003a 214B     		ldr	r3, .L32
+ 271 003c 0022     		movs	r2, #0
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 9
+
+
+ 272 003e 1A70     		strb	r2, [r3]
+ 273 0040 7047     		bx	lr
+ 274              	.L30:
+ 128:Core/Src/dice.c ****     if (GPIO_Pin == BUTTON_INTERRUPT_1_Pin)
+ 275              		.loc 1 128 1 view .LVU64
+ 276 0042 10B5     		push	{r4, lr}
+ 277              	.LCFI2:
+ 278              		.cfi_def_cfa_offset 8
+ 279              		.cfi_offset 4, -8
+ 280              		.cfi_offset 14, -4
+ 152:Core/Src/dice.c ****     {
+ 153:Core/Src/dice.c ****         if (systemState == STATE_SETTING)
+ 281              		.loc 1 153 9 is_stmt 1 view .LVU65
+ 282              		.loc 1 153 25 is_stmt 0 view .LVU66
+ 283 0044 1E4B     		ldr	r3, .L32
+ 284 0046 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 285              		.loc 1 153 12 view .LVU67
+ 286 0048 9BB9     		cbnz	r3, .L21
+ 154:Core/Src/dice.c ****         {
+ 155:Core/Src/dice.c ****             // 当前位数值加1，范围 0~9
+ 156:Core/Src/dice.c ****             setDigits[currentSettingIndex] = (setDigits[currentSettingIndex] + 1) % 10;
+ 287              		.loc 1 156 13 is_stmt 1 view .LVU68
+ 288              		.loc 1 156 56 is_stmt 0 view .LVU69
+ 289 004a 1E4C     		ldr	r4, .L32+4
+ 290 004c 2378     		ldrb	r3, [r4]	@ zero_extendqisi2
+ 291 004e DBB2     		uxtb	r3, r3
+ 292 0050 1D48     		ldr	r0, .L32+8
+ 293              	.LVL17:
+ 294              		.loc 1 156 56 view .LVU70
+ 295 0052 C35C     		ldrb	r3, [r0, r3]	@ zero_extendqisi2
+ 296              		.loc 1 156 78 view .LVU71
+ 297 0054 0133     		adds	r3, r3, #1
+ 298              		.loc 1 156 83 view .LVU72
+ 299 0056 1D4A     		ldr	r2, .L32+12
+ 300 0058 82FB0312 		smull	r1, r2, r2, r3
+ 301 005c 02F0FC01 		and	r1, r2, #252
+ 302 0060 01EBA202 		add	r2, r1, r2, asr #2
+ 303 0064 A3EB4203 		sub	r3, r3, r2, lsl #1
+ 304              		.loc 1 156 22 view .LVU73
+ 305 0068 2278     		ldrb	r2, [r4]	@ zero_extendqisi2
+ 306 006a D2B2     		uxtb	r2, r2
+ 307              		.loc 1 156 44 view .LVU74
+ 308 006c DBB2     		uxtb	r3, r3
+ 309 006e 8354     		strb	r3, [r0, r2]
+ 310              	.L16:
+ 157:Core/Src/dice.c ****         }
+ 158:Core/Src/dice.c ****         else if (systemState == STATE_READY)
+ 159:Core/Src/dice.c ****         {
+ 160:Core/Src/dice.c ****             // 启动摇骰子流程
+ 161:Core/Src/dice.c ****             systemState = STATE_ROLLING;
+ 162:Core/Src/dice.c ****             rollStartTime = HAL_GetTick();
+ 163:Core/Src/dice.c ****             fixedCount = 0;
+ 164:Core/Src/dice.c ****             // 根据每个位的设置值生成随机上限：
+ 165:Core/Src/dice.c ****             for (uint8_t i = 0; i < 4; i++)
+ 166:Core/Src/dice.c ****             {
+ 167:Core/Src/dice.c ****                 // 每位最终数字在 0 ~ setDigits[i] 之间随机
+ 168:Core/Src/dice.c ****                 finalDigits[i] = rand() % (setDigits[i] + 1);
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 10
+
+
+ 169:Core/Src/dice.c ****             }
+ 170:Core/Src/dice.c ****         }
+ 171:Core/Src/dice.c ****         else if (systemState == STATE_FINISHED)
+ 172:Core/Src/dice.c ****         {
+ 173:Core/Src/dice.c ****             // 可在最终显示状态下按 PA7 重置或者重新启动摇骰子（根据需求�
+ 174:Core/Src/dice.c ****             systemState = STATE_READY; // 返回准备状态
+ 175:Core/Src/dice.c ****         }
+ 176:Core/Src/dice.c ****     }
+ 177:Core/Src/dice.c **** }
+ 311              		.loc 1 177 1 view .LVU75
+ 312 0070 10BD     		pop	{r4, pc}
+ 313              	.LVL18:
+ 314              	.L21:
+ 158:Core/Src/dice.c ****         {
+ 315              		.loc 1 158 14 is_stmt 1 view .LVU76
+ 158:Core/Src/dice.c ****         {
+ 316              		.loc 1 158 30 is_stmt 0 view .LVU77
+ 317 0072 134B     		ldr	r3, .L32
+ 318 0074 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 158:Core/Src/dice.c ****         {
+ 319              		.loc 1 158 17 view .LVU78
+ 320 0076 012B     		cmp	r3, #1
+ 321 0078 07D0     		beq	.L31
+ 171:Core/Src/dice.c ****         {
+ 322              		.loc 1 171 14 is_stmt 1 view .LVU79
+ 171:Core/Src/dice.c ****         {
+ 323              		.loc 1 171 30 is_stmt 0 view .LVU80
+ 324 007a 114B     		ldr	r3, .L32
+ 325 007c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 171:Core/Src/dice.c ****         {
+ 326              		.loc 1 171 17 view .LVU81
+ 327 007e 032B     		cmp	r3, #3
+ 328 0080 F6D1     		bne	.L16
+ 174:Core/Src/dice.c ****         }
+ 329              		.loc 1 174 13 is_stmt 1 view .LVU82
+ 174:Core/Src/dice.c ****         }
+ 330              		.loc 1 174 25 is_stmt 0 view .LVU83
+ 331 0082 0F4B     		ldr	r3, .L32
+ 332 0084 0122     		movs	r2, #1
+ 333 0086 1A70     		strb	r2, [r3]
+ 334              		.loc 1 177 1 view .LVU84
+ 335 0088 F2E7     		b	.L16
+ 336              	.L31:
+ 161:Core/Src/dice.c ****             rollStartTime = HAL_GetTick();
+ 337              		.loc 1 161 13 is_stmt 1 view .LVU85
+ 161:Core/Src/dice.c ****             rollStartTime = HAL_GetTick();
+ 338              		.loc 1 161 25 is_stmt 0 view .LVU86
+ 339 008a 0D4B     		ldr	r3, .L32
+ 340 008c 0222     		movs	r2, #2
+ 341 008e 1A70     		strb	r2, [r3]
+ 162:Core/Src/dice.c ****             fixedCount = 0;
+ 342              		.loc 1 162 13 is_stmt 1 view .LVU87
+ 162:Core/Src/dice.c ****             fixedCount = 0;
+ 343              		.loc 1 162 29 is_stmt 0 view .LVU88
+ 344 0090 FFF7FEFF 		bl	HAL_GetTick
+ 345              	.LVL19:
+ 162:Core/Src/dice.c ****             fixedCount = 0;
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 11
+
+
+ 346              		.loc 1 162 27 discriminator 1 view .LVU89
+ 347 0094 0E4B     		ldr	r3, .L32+16
+ 348 0096 1860     		str	r0, [r3]
+ 163:Core/Src/dice.c ****             // 根据每个位的设置值生成随机上限：
+ 349              		.loc 1 163 13 is_stmt 1 view .LVU90
+ 163:Core/Src/dice.c ****             // 根据每个位的设置值生成随机上限：
+ 350              		.loc 1 163 24 is_stmt 0 view .LVU91
+ 351 0098 0024     		movs	r4, #0
+ 352 009a 0E4B     		ldr	r3, .L32+20
+ 353 009c 1C70     		strb	r4, [r3]
+ 165:Core/Src/dice.c ****             {
+ 354              		.loc 1 165 13 is_stmt 1 view .LVU92
+ 355              	.LBB7:
+ 165:Core/Src/dice.c ****             {
+ 356              		.loc 1 165 18 view .LVU93
+ 357              	.LVL20:
+ 165:Core/Src/dice.c ****             {
+ 358              		.loc 1 165 13 is_stmt 0 view .LVU94
+ 359 009e 0CE0     		b	.L23
+ 360              	.LVL21:
+ 361              	.L24:
+ 168:Core/Src/dice.c ****             }
+ 362              		.loc 1 168 17 is_stmt 1 view .LVU95
+ 168:Core/Src/dice.c ****             }
+ 363              		.loc 1 168 34 is_stmt 0 view .LVU96
+ 364 00a0 FFF7FEFF 		bl	rand
+ 365              	.LVL22:
+ 168:Core/Src/dice.c ****             }
+ 366              		.loc 1 168 53 discriminator 1 view .LVU97
+ 367 00a4 084B     		ldr	r3, .L32+8
+ 368 00a6 1B5D     		ldrb	r3, [r3, r4]	@ zero_extendqisi2
+ 168:Core/Src/dice.c ****             }
+ 369              		.loc 1 168 57 discriminator 1 view .LVU98
+ 370 00a8 0133     		adds	r3, r3, #1
+ 168:Core/Src/dice.c ****             }
+ 371              		.loc 1 168 41 discriminator 1 view .LVU99
+ 372 00aa 90FBF3F2 		sdiv	r2, r0, r3
+ 373 00ae 03FB1200 		mls	r0, r3, r2, r0
+ 168:Core/Src/dice.c ****             }
+ 374              		.loc 1 168 32 discriminator 1 view .LVU100
+ 375 00b2 094B     		ldr	r3, .L32+24
+ 376 00b4 1855     		strb	r0, [r3, r4]
+ 165:Core/Src/dice.c ****             {
+ 377              		.loc 1 165 41 is_stmt 1 discriminator 3 view .LVU101
+ 378 00b6 0134     		adds	r4, r4, #1
+ 379              	.LVL23:
+ 165:Core/Src/dice.c ****             {
+ 380              		.loc 1 165 41 is_stmt 0 discriminator 3 view .LVU102
+ 381 00b8 E4B2     		uxtb	r4, r4
+ 382              	.LVL24:
+ 383              	.L23:
+ 165:Core/Src/dice.c ****             {
+ 384              		.loc 1 165 35 is_stmt 1 discriminator 1 view .LVU103
+ 385 00ba 032C     		cmp	r4, #3
+ 386 00bc F0D9     		bls	.L24
+ 387 00be D7E7     		b	.L16
+ 388              	.L33:
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 12
+
+
+ 389              		.align	2
+ 390              	.L32:
+ 391 00c0 00000000 		.word	systemState
+ 392 00c4 00000000 		.word	currentSettingIndex
+ 393 00c8 00000000 		.word	setDigits
+ 394 00cc 67666666 		.word	1717986919
+ 395 00d0 00000000 		.word	rollStartTime
+ 396 00d4 00000000 		.word	fixedCount
+ 397 00d8 00000000 		.word	finalDigits
+ 398              	.LBE7:
+ 399              		.cfi_endproc
+ 400              	.LFE68:
+ 402              		.section	.text.process_rolling,"ax",%progbits
+ 403              		.align	1
+ 404              		.global	process_rolling
+ 405              		.syntax unified
+ 406              		.thumb
+ 407              		.thumb_func
+ 409              	process_rolling:
+ 410              	.LFB69:
+ 178:Core/Src/dice.c **** 
+ 179:Core/Src/dice.c **** void process_rolling(void)
+ 180:Core/Src/dice.c **** {
+ 411              		.loc 1 180 1 view -0
+ 412              		.cfi_startproc
+ 413              		@ args = 0, pretend = 0, frame = 0
+ 414              		@ frame_needed = 0, uses_anonymous_args = 0
+ 415 0000 08B5     		push	{r3, lr}
+ 416              	.LCFI3:
+ 417              		.cfi_def_cfa_offset 8
+ 418              		.cfi_offset 3, -8
+ 419              		.cfi_offset 14, -4
+ 181:Core/Src/dice.c ****     uint32_t now = HAL_GetTick();
+ 420              		.loc 1 181 5 view .LVU105
+ 421              		.loc 1 181 20 is_stmt 0 view .LVU106
+ 422 0002 FFF7FEFF 		bl	HAL_GetTick
+ 423              	.LVL25:
+ 182:Core/Src/dice.c ****     // 以1秒为间隔依次固定各位
+ 183:Core/Src/dice.c ****     if (systemState == STATE_ROLLING)
+ 424              		.loc 1 183 5 is_stmt 1 view .LVU107
+ 425              		.loc 1 183 21 is_stmt 0 view .LVU108
+ 426 0006 204B     		ldr	r3, .L43
+ 427 0008 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 428              		.loc 1 183 8 view .LVU109
+ 429 000a 022B     		cmp	r3, #2
+ 430 000c 00D0     		beq	.L40
+ 431              	.LVL26:
+ 432              	.L34:
+ 184:Core/Src/dice.c ****     {
+ 185:Core/Src/dice.c ****         if (fixedCount == 0 && (now - rollStartTime >= 2000))
+ 186:Core/Src/dice.c ****         {
+ 187:Core/Src/dice.c ****             // 固定第一位（缓慢降速可以在这期间更新显示频率，本例直接固
+ 188:Core/Src/dice.c ****             fixedCount = 1;
+ 189:Core/Src/dice.c ****         }
+ 190:Core/Src/dice.c ****         if (fixedCount == 1 && (now - rollStartTime >= 3000))
+ 191:Core/Src/dice.c ****         {
+ 192:Core/Src/dice.c ****             fixedCount = 2;
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 13
+
+
+ 193:Core/Src/dice.c ****         }
+ 194:Core/Src/dice.c ****         if (fixedCount == 2 && (now - rollStartTime >= 4000))
+ 195:Core/Src/dice.c ****         {
+ 196:Core/Src/dice.c ****             fixedCount = 3;
+ 197:Core/Src/dice.c ****         }
+ 198:Core/Src/dice.c ****         if (fixedCount == 3 && (now - rollStartTime >= 5000))
+ 199:Core/Src/dice.c ****         {
+ 200:Core/Src/dice.c ****             fixedCount = 4;
+ 201:Core/Src/dice.c ****             systemState = STATE_FINISHED; // 全部固定后进入结束状态
+ 202:Core/Src/dice.c ****         }
+ 203:Core/Src/dice.c ****     }
+ 204:Core/Src/dice.c **** }
+ 433              		.loc 1 204 1 view .LVU110
+ 434 000e 08BD     		pop	{r3, pc}
+ 435              	.LVL27:
+ 436              	.L40:
+ 185:Core/Src/dice.c ****         {
+ 437              		.loc 1 185 9 is_stmt 1 view .LVU111
+ 185:Core/Src/dice.c ****         {
+ 438              		.loc 1 185 24 is_stmt 0 view .LVU112
+ 439 0010 1E4B     		ldr	r3, .L43+4
+ 440 0012 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 185:Core/Src/dice.c ****         {
+ 441              		.loc 1 185 12 view .LVU113
+ 442 0014 43B9     		cbnz	r3, .L36
+ 185:Core/Src/dice.c ****         {
+ 443              		.loc 1 185 37 discriminator 1 view .LVU114
+ 444 0016 1E4B     		ldr	r3, .L43+8
+ 445 0018 1B68     		ldr	r3, [r3]
+ 446 001a C31A     		subs	r3, r0, r3
+ 185:Core/Src/dice.c ****         {
+ 447              		.loc 1 185 29 discriminator 1 view .LVU115
+ 448 001c B3F5FA6F 		cmp	r3, #2000
+ 449 0020 02D3     		bcc	.L36
+ 188:Core/Src/dice.c ****         }
+ 450              		.loc 1 188 13 is_stmt 1 view .LVU116
+ 188:Core/Src/dice.c ****         }
+ 451              		.loc 1 188 24 is_stmt 0 view .LVU117
+ 452 0022 1A4B     		ldr	r3, .L43+4
+ 453 0024 0122     		movs	r2, #1
+ 454 0026 1A70     		strb	r2, [r3]
+ 455              	.L36:
+ 190:Core/Src/dice.c ****         {
+ 456              		.loc 1 190 9 is_stmt 1 view .LVU118
+ 190:Core/Src/dice.c ****         {
+ 457              		.loc 1 190 24 is_stmt 0 view .LVU119
+ 458 0028 184B     		ldr	r3, .L43+4
+ 459 002a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 190:Core/Src/dice.c ****         {
+ 460              		.loc 1 190 12 view .LVU120
+ 461 002c 012B     		cmp	r3, #1
+ 462 002e 15D0     		beq	.L41
+ 463              	.L37:
+ 194:Core/Src/dice.c ****         {
+ 464              		.loc 1 194 9 is_stmt 1 view .LVU121
+ 194:Core/Src/dice.c ****         {
+ 465              		.loc 1 194 24 is_stmt 0 view .LVU122
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 14
+
+
+ 466 0030 164B     		ldr	r3, .L43+4
+ 467 0032 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 194:Core/Src/dice.c ****         {
+ 468              		.loc 1 194 12 view .LVU123
+ 469 0034 022B     		cmp	r3, #2
+ 470 0036 1CD0     		beq	.L42
+ 471              	.L38:
+ 198:Core/Src/dice.c ****         {
+ 472              		.loc 1 198 9 is_stmt 1 view .LVU124
+ 198:Core/Src/dice.c ****         {
+ 473              		.loc 1 198 24 is_stmt 0 view .LVU125
+ 474 0038 144B     		ldr	r3, .L43+4
+ 475 003a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 198:Core/Src/dice.c ****         {
+ 476              		.loc 1 198 12 view .LVU126
+ 477 003c 032B     		cmp	r3, #3
+ 478 003e E6D1     		bne	.L34
+ 198:Core/Src/dice.c ****         {
+ 479              		.loc 1 198 37 discriminator 1 view .LVU127
+ 480 0040 134B     		ldr	r3, .L43+8
+ 481 0042 1B68     		ldr	r3, [r3]
+ 482 0044 C01A     		subs	r0, r0, r3
+ 483              	.LVL28:
+ 198:Core/Src/dice.c ****         {
+ 484              		.loc 1 198 29 discriminator 1 view .LVU128
+ 485 0046 41F28733 		movw	r3, #4999
+ 486 004a 9842     		cmp	r0, r3
+ 487 004c DFD9     		bls	.L34
+ 200:Core/Src/dice.c ****             systemState = STATE_FINISHED; // 全部固定后进入结束状态
+ 488              		.loc 1 200 13 is_stmt 1 view .LVU129
+ 200:Core/Src/dice.c ****             systemState = STATE_FINISHED; // 全部固定后进入结束状态
+ 489              		.loc 1 200 24 is_stmt 0 view .LVU130
+ 490 004e 0F4B     		ldr	r3, .L43+4
+ 491 0050 0422     		movs	r2, #4
+ 492 0052 1A70     		strb	r2, [r3]
+ 201:Core/Src/dice.c ****         }
+ 493              		.loc 1 201 13 is_stmt 1 view .LVU131
+ 201:Core/Src/dice.c ****         }
+ 494              		.loc 1 201 25 is_stmt 0 view .LVU132
+ 495 0054 0C4B     		ldr	r3, .L43
+ 496 0056 0322     		movs	r2, #3
+ 497 0058 1A70     		strb	r2, [r3]
+ 498              		.loc 1 204 1 view .LVU133
+ 499 005a D8E7     		b	.L34
+ 500              	.LVL29:
+ 501              	.L41:
+ 190:Core/Src/dice.c ****         {
+ 502              		.loc 1 190 37 discriminator 1 view .LVU134
+ 503 005c 0C4B     		ldr	r3, .L43+8
+ 504 005e 1B68     		ldr	r3, [r3]
+ 505 0060 C31A     		subs	r3, r0, r3
+ 190:Core/Src/dice.c ****         {
+ 506              		.loc 1 190 29 discriminator 1 view .LVU135
+ 507 0062 40F6B732 		movw	r2, #2999
+ 508 0066 9342     		cmp	r3, r2
+ 509 0068 E2D9     		bls	.L37
+ 192:Core/Src/dice.c ****         }
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 15
+
+
+ 510              		.loc 1 192 13 is_stmt 1 view .LVU136
+ 192:Core/Src/dice.c ****         }
+ 511              		.loc 1 192 24 is_stmt 0 view .LVU137
+ 512 006a 084B     		ldr	r3, .L43+4
+ 513 006c 0222     		movs	r2, #2
+ 514 006e 1A70     		strb	r2, [r3]
+ 515 0070 DEE7     		b	.L37
+ 516              	.L42:
+ 194:Core/Src/dice.c ****         {
+ 517              		.loc 1 194 37 discriminator 1 view .LVU138
+ 518 0072 074B     		ldr	r3, .L43+8
+ 519 0074 1B68     		ldr	r3, [r3]
+ 520 0076 C31A     		subs	r3, r0, r3
+ 194:Core/Src/dice.c ****         {
+ 521              		.loc 1 194 29 discriminator 1 view .LVU139
+ 522 0078 B3F57A6F 		cmp	r3, #4000
+ 523 007c DCD3     		bcc	.L38
+ 196:Core/Src/dice.c ****         }
+ 524              		.loc 1 196 13 is_stmt 1 view .LVU140
+ 196:Core/Src/dice.c ****         }
+ 525              		.loc 1 196 24 is_stmt 0 view .LVU141
+ 526 007e 034B     		ldr	r3, .L43+4
+ 527 0080 0322     		movs	r2, #3
+ 528 0082 1A70     		strb	r2, [r3]
+ 529 0084 D8E7     		b	.L38
+ 530              	.L44:
+ 531 0086 00BF     		.align	2
+ 532              	.L43:
+ 533 0088 00000000 		.word	systemState
+ 534 008c 00000000 		.word	fixedCount
+ 535 0090 00000000 		.word	rollStartTime
+ 536              		.cfi_endproc
+ 537              	.LFE69:
+ 539              		.section	.text.run_dice,"ax",%progbits
+ 540              		.align	1
+ 541              		.global	run_dice
+ 542              		.syntax unified
+ 543              		.thumb
+ 544              		.thumb_func
+ 546              	run_dice:
+ 547              	.LFB66:
+  48:Core/Src/dice.c ****     // 根据状态处理摇骰子流程
+ 548              		.loc 1 48 1 is_stmt 1 view -0
+ 549              		.cfi_startproc
+ 550              		@ args = 0, pretend = 0, frame = 8
+ 551              		@ frame_needed = 0, uses_anonymous_args = 0
+ 552 0000 10B5     		push	{r4, lr}
+ 553              	.LCFI4:
+ 554              		.cfi_def_cfa_offset 8
+ 555              		.cfi_offset 4, -8
+ 556              		.cfi_offset 14, -4
+ 557 0002 82B0     		sub	sp, sp, #8
+ 558              	.LCFI5:
+ 559              		.cfi_def_cfa_offset 16
+  50:Core/Src/dice.c ****     {
+ 560              		.loc 1 50 5 view .LVU143
+  50:Core/Src/dice.c ****     {
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 16
+
+
+ 561              		.loc 1 50 21 is_stmt 0 view .LVU144
+ 562 0004 434B     		ldr	r3, .L67
+ 563 0006 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  50:Core/Src/dice.c ****     {
+ 564              		.loc 1 50 8 view .LVU145
+ 565 0008 022B     		cmp	r3, #2
+ 566 000a 1CD0     		beq	.L63
+ 567              	.L46:
+  55:Core/Src/dice.c **** 
+ 568              		.loc 1 55 5 is_stmt 1 view .LVU146
+  55:Core/Src/dice.c **** 
+ 569              		.loc 1 55 13 is_stmt 0 view .LVU147
+ 570 000c 0023     		movs	r3, #0
+ 571 000e 0193     		str	r3, [sp, #4]
+  57:Core/Src/dice.c ****     {
+ 572              		.loc 1 57 5 is_stmt 1 view .LVU148
+  57:Core/Src/dice.c ****     {
+ 573              		.loc 1 57 21 is_stmt 0 view .LVU149
+ 574 0010 404B     		ldr	r3, .L67
+ 575 0012 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+  57:Core/Src/dice.c ****     {
+ 576              		.loc 1 57 8 view .LVU150
+ 577 0014 02F0FF03 		and	r3, r2, #255
+ 578 0018 F2B1     		cbz	r2, .L47
+  77:Core/Src/dice.c ****     {
+ 579              		.loc 1 77 10 is_stmt 1 view .LVU151
+  77:Core/Src/dice.c ****     {
+ 580              		.loc 1 77 26 is_stmt 0 view .LVU152
+ 581 001a 3E4B     		ldr	r3, .L67
+ 582 001c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  77:Core/Src/dice.c ****     {
+ 583              		.loc 1 77 13 view .LVU153
+ 584 001e 022B     		cmp	r3, #2
+ 585 0020 47D0     		beq	.L64
+  95:Core/Src/dice.c ****     {
+ 586              		.loc 1 95 10 is_stmt 1 view .LVU154
+  95:Core/Src/dice.c ****     {
+ 587              		.loc 1 95 26 is_stmt 0 view .LVU155
+ 588 0022 3C4B     		ldr	r3, .L67
+ 589 0024 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  95:Core/Src/dice.c ****     {
+ 590              		.loc 1 95 13 view .LVU156
+ 591 0026 032B     		cmp	r3, #3
+ 592 0028 65D0     		beq	.L65
+ 105:Core/Src/dice.c ****         d[1] = setDigits[1];
+ 593              		.loc 1 105 9 is_stmt 1 view .LVU157
+ 105:Core/Src/dice.c ****         d[1] = setDigits[1];
+ 594              		.loc 1 105 25 is_stmt 0 view .LVU158
+ 595 002a 3B4B     		ldr	r3, .L67+4
+ 596 002c 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 105:Core/Src/dice.c ****         d[1] = setDigits[1];
+ 597              		.loc 1 105 14 view .LVU159
+ 598 002e 8DF80420 		strb	r2, [sp, #4]
+ 106:Core/Src/dice.c ****         d[2] = setDigits[2];
+ 599              		.loc 1 106 9 is_stmt 1 view .LVU160
+ 106:Core/Src/dice.c ****         d[2] = setDigits[2];
+ 600              		.loc 1 106 25 is_stmt 0 view .LVU161
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 17
+
+
+ 601 0032 5A78     		ldrb	r2, [r3, #1]	@ zero_extendqisi2
+ 106:Core/Src/dice.c ****         d[2] = setDigits[2];
+ 602              		.loc 1 106 14 view .LVU162
+ 603 0034 8DF80520 		strb	r2, [sp, #5]
+ 107:Core/Src/dice.c ****         d[3] = setDigits[3];
+ 604              		.loc 1 107 9 is_stmt 1 view .LVU163
+ 107:Core/Src/dice.c ****         d[3] = setDigits[3];
+ 605              		.loc 1 107 25 is_stmt 0 view .LVU164
+ 606 0038 9A78     		ldrb	r2, [r3, #2]	@ zero_extendqisi2
+ 107:Core/Src/dice.c ****         d[3] = setDigits[3];
+ 607              		.loc 1 107 14 view .LVU165
+ 608 003a 8DF80620 		strb	r2, [sp, #6]
+ 108:Core/Src/dice.c ****     }
+ 609              		.loc 1 108 9 is_stmt 1 view .LVU166
+ 108:Core/Src/dice.c ****     }
+ 610              		.loc 1 108 25 is_stmt 0 view .LVU167
+ 611 003e DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 108:Core/Src/dice.c ****     }
+ 612              		.loc 1 108 14 view .LVU168
+ 613 0040 8DF80730 		strb	r3, [sp, #7]
+ 614 0044 23E0     		b	.L52
+ 615              	.L63:
+  52:Core/Src/dice.c ****     }
+ 616              		.loc 1 52 9 is_stmt 1 view .LVU169
+ 617 0046 FFF7FEFF 		bl	process_rolling
+ 618              	.LVL30:
+ 619 004a DFE7     		b	.L46
+ 620              	.LVL31:
+ 621              	.L49:
+ 622              	.LBB8:
+  69:Core/Src/dice.c ****             }
+ 623              		.loc 1 69 17 view .LVU170
+  69:Core/Src/dice.c ****             }
+ 624              		.loc 1 69 46 is_stmt 0 view .LVU171
+ 625 004c 324A     		ldr	r2, .L67+4
+ 626 004e D15C     		ldrb	r1, [r2, r3]	@ zero_extendqisi2
+  69:Core/Src/dice.c ****             }
+ 627              		.loc 1 69 35 view .LVU172
+ 628 0050 324A     		ldr	r2, .L67+8
+ 629 0052 D154     		strb	r1, [r2, r3]
+ 630              	.L50:
+  60:Core/Src/dice.c ****         {
+ 631              		.loc 1 60 37 is_stmt 1 discriminator 2 view .LVU173
+ 632 0054 0133     		adds	r3, r3, #1
+ 633              	.LVL32:
+  60:Core/Src/dice.c ****         {
+ 634              		.loc 1 60 37 is_stmt 0 discriminator 2 view .LVU174
+ 635 0056 DBB2     		uxtb	r3, r3
+ 636              	.LVL33:
+ 637              	.L47:
+  60:Core/Src/dice.c ****         {
+ 638              		.loc 1 60 31 is_stmt 1 discriminator 1 view .LVU175
+ 639 0058 032B     		cmp	r3, #3
+ 640 005a 0BD8     		bhi	.L66
+  62:Core/Src/dice.c ****             {
+ 641              		.loc 1 62 13 view .LVU176
+  62:Core/Src/dice.c ****             {
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 18
+
+
+ 642              		.loc 1 62 19 is_stmt 0 view .LVU177
+ 643 005c 304A     		ldr	r2, .L67+12
+ 644 005e 1278     		ldrb	r2, [r2]	@ zero_extendqisi2
+  62:Core/Src/dice.c ****             {
+ 645              		.loc 1 62 16 view .LVU178
+ 646 0060 9A42     		cmp	r2, r3
+ 647 0062 F3D1     		bne	.L49
+  62:Core/Src/dice.c ****             {
+ 648              		.loc 1 62 42 discriminator 1 view .LVU179
+ 649 0064 2F4A     		ldr	r2, .L67+16
+ 650 0066 1278     		ldrb	r2, [r2]	@ zero_extendqisi2
+ 651 0068 002A     		cmp	r2, #0
+ 652 006a EFD0     		beq	.L49
+  65:Core/Src/dice.c ****             }
+ 653              		.loc 1 65 17 is_stmt 1 view .LVU180
+  65:Core/Src/dice.c ****             }
+ 654              		.loc 1 65 35 is_stmt 0 view .LVU181
+ 655 006c 2B4A     		ldr	r2, .L67+8
+ 656 006e 0A21     		movs	r1, #10
+ 657 0070 D154     		strb	r1, [r2, r3]
+ 658 0072 EFE7     		b	.L50
+ 659              	.L66:
+ 660              	.LBE8:
+  72:Core/Src/dice.c ****         d[1] = currentDisplay[1];
+ 661              		.loc 1 72 9 is_stmt 1 view .LVU182
+  72:Core/Src/dice.c ****         d[1] = currentDisplay[1];
+ 662              		.loc 1 72 30 is_stmt 0 view .LVU183
+ 663 0074 294B     		ldr	r3, .L67+8
+ 664              	.LVL34:
+  72:Core/Src/dice.c ****         d[1] = currentDisplay[1];
+ 665              		.loc 1 72 30 view .LVU184
+ 666 0076 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+  72:Core/Src/dice.c ****         d[1] = currentDisplay[1];
+ 667              		.loc 1 72 14 view .LVU185
+ 668 0078 8DF80420 		strb	r2, [sp, #4]
+  73:Core/Src/dice.c ****         d[2] = currentDisplay[2];
+ 669              		.loc 1 73 9 is_stmt 1 view .LVU186
+  73:Core/Src/dice.c ****         d[2] = currentDisplay[2];
+ 670              		.loc 1 73 30 is_stmt 0 view .LVU187
+ 671 007c 5A78     		ldrb	r2, [r3, #1]	@ zero_extendqisi2
+  73:Core/Src/dice.c ****         d[2] = currentDisplay[2];
+ 672              		.loc 1 73 14 view .LVU188
+ 673 007e 8DF80520 		strb	r2, [sp, #5]
+  74:Core/Src/dice.c ****         d[3] = currentDisplay[3];
+ 674              		.loc 1 74 9 is_stmt 1 view .LVU189
+  74:Core/Src/dice.c ****         d[3] = currentDisplay[3];
+ 675              		.loc 1 74 30 is_stmt 0 view .LVU190
+ 676 0082 9A78     		ldrb	r2, [r3, #2]	@ zero_extendqisi2
+  74:Core/Src/dice.c ****         d[3] = currentDisplay[3];
+ 677              		.loc 1 74 14 view .LVU191
+ 678 0084 8DF80620 		strb	r2, [sp, #6]
+  75:Core/Src/dice.c ****     }
+ 679              		.loc 1 75 9 is_stmt 1 view .LVU192
+  75:Core/Src/dice.c ****     }
+ 680              		.loc 1 75 30 is_stmt 0 view .LVU193
+ 681 0088 DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+  75:Core/Src/dice.c ****     }
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 19
+
+
+ 682              		.loc 1 75 14 view .LVU194
+ 683 008a 8DF80730 		strb	r3, [sp, #7]
+ 684              	.LVL35:
+ 685              	.L52:
+ 111:Core/Src/dice.c **** 
+ 686              		.loc 1 111 5 is_stmt 1 view .LVU195
+ 687 008e 01A8     		add	r0, sp, #4
+ 688 0090 FFF7FEFF 		bl	display_dice
+ 689              	.LVL36:
+ 114:Core/Src/dice.c **** }
+ 690              		.loc 1 114 5 view .LVU196
+ 691 0094 FFF7FEFF 		bl	blink_control_dice
+ 692              	.LVL37:
+ 115:Core/Src/dice.c **** 
+ 693              		.loc 1 115 1 is_stmt 0 view .LVU197
+ 694 0098 02B0     		add	sp, sp, #8
+ 695              	.LCFI6:
+ 696              		.cfi_remember_state
+ 697              		.cfi_def_cfa_offset 8
+ 698              		@ sp needed
+ 699 009a 10BD     		pop	{r4, pc}
+ 700              	.LVL38:
+ 701              	.L55:
+ 702              	.LCFI7:
+ 703              		.cfi_restore_state
+ 704              	.LBB9:
+  83:Core/Src/dice.c ****         }
+ 705              		.loc 1 83 13 is_stmt 1 view .LVU198
+  83:Core/Src/dice.c ****         }
+ 706              		.loc 1 83 44 is_stmt 0 view .LVU199
+ 707 009c 224A     		ldr	r2, .L67+20
+ 708 009e D15C     		ldrb	r1, [r2, r3]	@ zero_extendqisi2
+  83:Core/Src/dice.c ****         }
+ 709              		.loc 1 83 31 view .LVU200
+ 710 00a0 1E4A     		ldr	r2, .L67+8
+ 711 00a2 D154     		strb	r1, [r2, r3]
+  81:Core/Src/dice.c ****         {
+ 712              		.loc 1 81 46 is_stmt 1 discriminator 3 view .LVU201
+ 713 00a4 0133     		adds	r3, r3, #1
+ 714              	.LVL39:
+  81:Core/Src/dice.c ****         {
+ 715              		.loc 1 81 46 is_stmt 0 discriminator 3 view .LVU202
+ 716 00a6 DBB2     		uxtb	r3, r3
+ 717              	.LVL40:
+ 718              	.L53:
+  81:Core/Src/dice.c ****         {
+ 719              		.loc 1 81 31 is_stmt 1 discriminator 1 view .LVU203
+ 720 00a8 204A     		ldr	r2, .L67+24
+ 721 00aa 1478     		ldrb	r4, [r2]	@ zero_extendqisi2
+ 722 00ac 9C42     		cmp	r4, r3
+ 723 00ae F5D8     		bhi	.L55
+ 724 00b0 11E0     		b	.L56
+ 725              	.LVL41:
+ 726              	.L64:
+  81:Core/Src/dice.c ****         {
+ 727              		.loc 1 81 22 is_stmt 0 view .LVU204
+ 728 00b2 0023     		movs	r3, #0
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 20
+
+
+ 729 00b4 F8E7     		b	.L53
+ 730              	.LVL42:
+ 731              	.L57:
+  81:Core/Src/dice.c ****         {
+ 732              		.loc 1 81 22 view .LVU205
+ 733              	.LBE9:
+ 734              	.LBB10:
+  88:Core/Src/dice.c ****         }
+ 735              		.loc 1 88 13 is_stmt 1 view .LVU206
+  88:Core/Src/dice.c ****         }
+ 736              		.loc 1 88 33 is_stmt 0 view .LVU207
+ 737 00b6 FFF7FEFF 		bl	rand
+ 738              	.LVL43:
+  88:Core/Src/dice.c ****         }
+ 739              		.loc 1 88 40 discriminator 1 view .LVU208
+ 740 00ba 1D4A     		ldr	r2, .L67+28
+ 741 00bc 82FB0032 		smull	r3, r2, r2, r0
+ 742 00c0 C317     		asrs	r3, r0, #31
+ 743 00c2 C3EBA203 		rsb	r3, r3, r2, asr #2
+ 744 00c6 03EB8303 		add	r3, r3, r3, lsl #2
+ 745 00ca A0EB4303 		sub	r3, r0, r3, lsl #1
+  88:Core/Src/dice.c ****         }
+ 746              		.loc 1 88 31 discriminator 1 view .LVU209
+ 747 00ce 134A     		ldr	r2, .L67+8
+ 748 00d0 1355     		strb	r3, [r2, r4]
+  86:Core/Src/dice.c ****         {
+ 749              		.loc 1 86 46 is_stmt 1 discriminator 3 view .LVU210
+ 750 00d2 0134     		adds	r4, r4, #1
+ 751              	.LVL44:
+  86:Core/Src/dice.c ****         {
+ 752              		.loc 1 86 46 is_stmt 0 discriminator 3 view .LVU211
+ 753 00d4 E4B2     		uxtb	r4, r4
+ 754              	.LVL45:
+ 755              	.L56:
+  86:Core/Src/dice.c ****         {
+ 756              		.loc 1 86 40 is_stmt 1 discriminator 1 view .LVU212
+ 757 00d6 032C     		cmp	r4, #3
+ 758 00d8 EDD9     		bls	.L57
+ 759              	.LBE10:
+  90:Core/Src/dice.c ****         d[1] = currentDisplay[1];
+ 760              		.loc 1 90 9 view .LVU213
+  90:Core/Src/dice.c ****         d[1] = currentDisplay[1];
+ 761              		.loc 1 90 30 is_stmt 0 view .LVU214
+ 762 00da 104B     		ldr	r3, .L67+8
+ 763 00dc 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+  90:Core/Src/dice.c ****         d[1] = currentDisplay[1];
+ 764              		.loc 1 90 14 view .LVU215
+ 765 00de 8DF80420 		strb	r2, [sp, #4]
+  91:Core/Src/dice.c ****         d[2] = currentDisplay[2];
+ 766              		.loc 1 91 9 is_stmt 1 view .LVU216
+  91:Core/Src/dice.c ****         d[2] = currentDisplay[2];
+ 767              		.loc 1 91 30 is_stmt 0 view .LVU217
+ 768 00e2 5A78     		ldrb	r2, [r3, #1]	@ zero_extendqisi2
+  91:Core/Src/dice.c ****         d[2] = currentDisplay[2];
+ 769              		.loc 1 91 14 view .LVU218
+ 770 00e4 8DF80520 		strb	r2, [sp, #5]
+  92:Core/Src/dice.c ****         d[3] = currentDisplay[3];
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 21
+
+
+ 771              		.loc 1 92 9 is_stmt 1 view .LVU219
+  92:Core/Src/dice.c ****         d[3] = currentDisplay[3];
+ 772              		.loc 1 92 30 is_stmt 0 view .LVU220
+ 773 00e8 9A78     		ldrb	r2, [r3, #2]	@ zero_extendqisi2
+  92:Core/Src/dice.c ****         d[3] = currentDisplay[3];
+ 774              		.loc 1 92 14 view .LVU221
+ 775 00ea 8DF80620 		strb	r2, [sp, #6]
+  93:Core/Src/dice.c ****     }
+ 776              		.loc 1 93 9 is_stmt 1 view .LVU222
+  93:Core/Src/dice.c ****     }
+ 777              		.loc 1 93 30 is_stmt 0 view .LVU223
+ 778 00ee DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+  93:Core/Src/dice.c ****     }
+ 779              		.loc 1 93 14 view .LVU224
+ 780 00f0 8DF80730 		strb	r3, [sp, #7]
+ 781 00f4 CBE7     		b	.L52
+ 782              	.LVL46:
+ 783              	.L65:
+  98:Core/Src/dice.c ****         d[1] = finalDigits[1];
+ 784              		.loc 1 98 9 is_stmt 1 view .LVU225
+  98:Core/Src/dice.c ****         d[1] = finalDigits[1];
+ 785              		.loc 1 98 27 is_stmt 0 view .LVU226
+ 786 00f6 0C4B     		ldr	r3, .L67+20
+ 787 00f8 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+  98:Core/Src/dice.c ****         d[1] = finalDigits[1];
+ 788              		.loc 1 98 14 view .LVU227
+ 789 00fa 8DF80420 		strb	r2, [sp, #4]
+  99:Core/Src/dice.c ****         d[2] = finalDigits[2];
+ 790              		.loc 1 99 9 is_stmt 1 view .LVU228
+  99:Core/Src/dice.c ****         d[2] = finalDigits[2];
+ 791              		.loc 1 99 27 is_stmt 0 view .LVU229
+ 792 00fe 5A78     		ldrb	r2, [r3, #1]	@ zero_extendqisi2
+  99:Core/Src/dice.c ****         d[2] = finalDigits[2];
+ 793              		.loc 1 99 14 view .LVU230
+ 794 0100 8DF80520 		strb	r2, [sp, #5]
+ 100:Core/Src/dice.c ****         d[3] = finalDigits[3];
+ 795              		.loc 1 100 9 is_stmt 1 view .LVU231
+ 100:Core/Src/dice.c ****         d[3] = finalDigits[3];
+ 796              		.loc 1 100 27 is_stmt 0 view .LVU232
+ 797 0104 9A78     		ldrb	r2, [r3, #2]	@ zero_extendqisi2
+ 100:Core/Src/dice.c ****         d[3] = finalDigits[3];
+ 798              		.loc 1 100 14 view .LVU233
+ 799 0106 8DF80620 		strb	r2, [sp, #6]
+ 101:Core/Src/dice.c ****     }
+ 800              		.loc 1 101 9 is_stmt 1 view .LVU234
+ 101:Core/Src/dice.c ****     }
+ 801              		.loc 1 101 27 is_stmt 0 view .LVU235
+ 802 010a DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 101:Core/Src/dice.c ****     }
+ 803              		.loc 1 101 14 view .LVU236
+ 804 010c 8DF80730 		strb	r3, [sp, #7]
+ 805 0110 BDE7     		b	.L52
+ 806              	.L68:
+ 807 0112 00BF     		.align	2
+ 808              	.L67:
+ 809 0114 00000000 		.word	systemState
+ 810 0118 00000000 		.word	setDigits
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 22
+
+
+ 811 011c 00000000 		.word	currentDisplay
+ 812 0120 00000000 		.word	currentSettingIndex
+ 813 0124 00000000 		.word	blinkFlag
+ 814 0128 00000000 		.word	finalDigits
+ 815 012c 00000000 		.word	fixedCount
+ 816 0130 67666666 		.word	1717986919
+ 817              		.cfi_endproc
+ 818              	.LFE66:
+ 820              		.section	.bss.diceLastBlinkTime.0,"aw",%nobits
+ 821              		.align	2
+ 824              	diceLastBlinkTime.0:
+ 825 0000 00000000 		.space	4
+ 826              		.global	blinkFlag
+ 827              		.section	.bss.blinkFlag,"aw",%nobits
+ 830              	blinkFlag:
+ 831 0000 00       		.space	1
+ 832              		.global	fixedCount
+ 833              		.section	.bss.fixedCount,"aw",%nobits
+ 836              	fixedCount:
+ 837 0000 00       		.space	1
+ 838              		.global	rollStartTime
+ 839              		.section	.bss.rollStartTime,"aw",%nobits
+ 840              		.align	2
+ 843              	rollStartTime:
+ 844 0000 00000000 		.space	4
+ 845              		.global	currentDisplay
+ 846              		.section	.bss.currentDisplay,"aw",%nobits
+ 847              		.align	2
+ 850              	currentDisplay:
+ 851 0000 00000000 		.space	4
+ 852              		.global	finalDigits
+ 853              		.section	.bss.finalDigits,"aw",%nobits
+ 854              		.align	2
+ 857              	finalDigits:
+ 858 0000 00000000 		.space	4
+ 859              		.global	currentSettingIndex
+ 860              		.section	.bss.currentSettingIndex,"aw",%nobits
+ 863              	currentSettingIndex:
+ 864 0000 00       		.space	1
+ 865              		.global	setDigits
+ 866              		.section	.data.setDigits,"aw"
+ 867              		.align	2
+ 870              	setDigits:
+ 871 0000 06060606 		.ascii	"\006\006\006\006"
+ 872              		.global	systemState
+ 873              		.section	.data.systemState,"aw"
+ 876              	systemState:
+ 877 0000 01       		.byte	1
+ 878              		.text
+ 879              	.Letext0:
+ 880              		.file 2 "D:/arm-none-eabi-gcc/arm-none-eabi/include/machine/_default_types.h"
+ 881              		.file 3 "D:/arm-none-eabi-gcc/arm-none-eabi/include/sys/_stdint.h"
+ 882              		.file 4 "Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h"
+ 883              		.file 5 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h"
+ 884              		.file 6 "Core/Inc/main.h"
+ 885              		.file 7 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h"
+ 886              		.file 8 "D:/arm-none-eabi-gcc/arm-none-eabi/include/stdlib.h"
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 23
+
+
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s 			page 24
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 dice.c
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:19     .text.display_dice:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:25     .text.display_dice:00000000 display_dice
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:135    .text.display_dice:00000060 $d
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:144    .text.blink_control_dice:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:150    .text.blink_control_dice:00000000 blink_control_dice
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:197    .text.blink_control_dice:0000002c $d
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:824    .bss.diceLastBlinkTime.0:00000000 diceLastBlinkTime.0
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:830    .bss.blinkFlag:00000000 blinkFlag
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:203    .text.setting_dice:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:209    .text.setting_dice:00000000 setting_dice
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:391    .text.setting_dice:000000c0 $d
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:876    .data.systemState:00000000 systemState
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:863    .bss.currentSettingIndex:00000000 currentSettingIndex
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:870    .data.setDigits:00000000 setDigits
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:843    .bss.rollStartTime:00000000 rollStartTime
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:836    .bss.fixedCount:00000000 fixedCount
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:857    .bss.finalDigits:00000000 finalDigits
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:403    .text.process_rolling:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:409    .text.process_rolling:00000000 process_rolling
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:533    .text.process_rolling:00000088 $d
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:540    .text.run_dice:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:546    .text.run_dice:00000000 run_dice
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:809    .text.run_dice:00000114 $d
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:850    .bss.currentDisplay:00000000 currentDisplay
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:821    .bss.diceLastBlinkTime.0:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:831    .bss.blinkFlag:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:837    .bss.fixedCount:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:840    .bss.rollStartTime:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:847    .bss.currentDisplay:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:854    .bss.finalDigits:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:864    .bss.currentSettingIndex:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccgLK9V0.s:867    .data.setDigits:00000000 $d
+
+UNDEFINED SYMBOLS
+HAL_GPIO_WritePin
+HAL_Delay
+LED_ARR
+DIGIT_COUNT
+DIGIT_ARR
+segment_code
+HAL_GetTick
+rand

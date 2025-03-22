@@ -1,0 +1,60 @@
+{
+    "tasks": [
+		{
+			"type": "shell",
+			"label": "创建build文件夹",
+			"command": "if (!(Test-Path build)) {mkdir build}",
+			"detail": "Create new folder \"build\""
+		},
+		{
+			"type": "shell",
+			"label": "编译",
+			"command": "mingw32-make",
+			"dependsOn": "Create BUILD-DIR",
+			"args": [
+				"-j"
+			],
+			"detail": "mingw32-maker.exe编译任务。",
+			"problemMatcher": []
+		},
+		{
+			"type": "shell",
+			"label": "删除build文件夹",
+			"command": "rm",
+			"args": [
+				"-r",
+				"build"
+			],
+			"detail": "Delete folder \"build\" and its content",
+			"problemMatcher": []
+		},
+		{
+			"type": "shell",
+			"label": "烧录",
+			"command": "openocd",
+			"args": [
+				"-f",
+				"interface/cmsis-dap.cfg",
+				"-f",
+				"target/stm32f1x.cfg",
+				"-c",
+				"program build/DigitWatch.bin verify reset exit 0x08000000"
+			],
+			"detail": "OpenOCD烧录",
+			"problemMatcher": []
+		},
+		{
+			"type": "shell",
+			"label": "OpenOCD",
+			"command": "openocd",
+			"args": [
+				"-f",
+				"interface/cmsis-dap.cfg",
+				"-f",
+				"target/stm32f1x.cfg"
+			],
+			"detail": "start OpenOCD and wait for gdb",
+			"problemMatcher": []
+		}
+	],
+}

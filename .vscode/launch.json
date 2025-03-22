@@ -1,0 +1,54 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "调试",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}\\build\\DigitWatch.elf",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "D:\\arm-none-eabi-gcc\\bin\\arm-none-eabi-gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": false,
+                },
+                {
+                    "description": "select .elf to gdb",
+                    "text": "file D:/code/stm32/DigitWatch/build/DigitWatch.elf",
+                    "ignoreFailures": false,
+                },
+                {
+                    "description": "connect gdb server",
+                    "text": "target remote localhost:3333",
+                    "ignoreFailures": false,
+                },
+                {
+                    "description": "Reset MCU",
+                    "text": "monitor reset",
+                    "ignoreFailures": false,
+                },
+                {
+                    "description": "Halt",
+                    "text": "monitor halt",
+                    "ignoreFailures": false,
+                },
+                {
+                    "description": "Burn",
+                    "text": "load",
+                    "ignoreFailures": false,
+                },
+            ],
+            "preLaunchTask": "编译"
+        }
+    ]
+}

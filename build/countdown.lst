@@ -1,0 +1,1585 @@
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 1
+
+
+   1              		.cpu cortex-m3
+   2              		.arch armv7-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"countdown.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Core/Src/countdown.c"
+  18              		.section	.text.display_countdown,"ax",%progbits
+  19              		.align	1
+  20              		.global	display_countdown
+  21              		.syntax unified
+  22              		.thumb
+  23              		.thumb_func
+  25              	display_countdown:
+  26              	.LVL0:
+  27              	.LFB65:
+   1:Core/Src/countdown.c **** #include "countdown.h"
+   2:Core/Src/countdown.c **** #include "main.h"
+   3:Core/Src/countdown.c **** 
+   4:Core/Src/countdown.c **** volatile CountdownState countdownState = STATE_IDLE;
+   5:Core/Src/countdown.c **** 
+   6:Core/Src/countdown.c **** volatile uint8_t setMinutes = 2;     // 默认5分钟（0~60循环）
+   7:Core/Src/countdown.c **** volatile uint8_t setSeconds = 0;    // 默认0秒（0~60循环）
+   8:Core/Src/countdown.c **** volatile uint32_t countdownTime = 0; // 毫秒计时（倒计时剩余时间）
+   9:Core/Src/countdown.c **** 
+  10:Core/Src/countdown.c **** volatile uint8_t cd_blink_flag = 0; // 闪烁标志
+  11:Core/Src/countdown.c **** uint32_t lastBlinkTime = 0;         // 用于闪烁定时（例如500ms）
+  12:Core/Src/countdown.c **** 
+  13:Core/Src/countdown.c **** void display_countdown(uint8_t d[4], uint8_t flag)
+  14:Core/Src/countdown.c **** {
+  28              		.loc 1 14 1 view -0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		.loc 1 14 1 is_stmt 0 view .LVU1
+  33 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+  34              	.LCFI0:
+  35              		.cfi_def_cfa_offset 24
+  36              		.cfi_offset 4, -24
+  37              		.cfi_offset 5, -20
+  38              		.cfi_offset 6, -16
+  39              		.cfi_offset 7, -12
+  40              		.cfi_offset 8, -8
+  41              		.cfi_offset 14, -4
+  42 0004 8046     		mov	r8, r0
+  43 0006 0F46     		mov	r7, r1
+  15:Core/Src/countdown.c ****     // 将 d 分别显示到 4 位共阴数码管上
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 2
+
+
+  16:Core/Src/countdown.c ****     for (uint8_t i = 0; i < DIGIT_COUNT; i++)
+  44              		.loc 1 16 5 is_stmt 1 view .LVU2
+  45              	.LBB2:
+  46              		.loc 1 16 10 view .LVU3
+  47              	.LVL1:
+  48              		.loc 1 16 18 is_stmt 0 view .LVU4
+  49 0008 0025     		movs	r5, #0
+  50              		.loc 1 16 5 view .LVU5
+  51 000a 1DE0     		b	.L2
+  52              	.LVL2:
+  53              	.L4:
+  54              	.LBB3:
+  55              	.LBB4:
+  17:Core/Src/countdown.c ****     {
+  18:Core/Src/countdown.c ****         HAL_GPIO_WritePin(GPIOA, DIGIT_1_Pin | DIGIT_2_Pin | DIGIT_3_Pin | DIGIT_4_Pin, GPIO_PIN_SE
+  19:Core/Src/countdown.c **** 
+  20:Core/Src/countdown.c ****         HAL_GPIO_WritePin(GPIOA, DIGIT_ARR[i], GPIO_PIN_RESET);
+  21:Core/Src/countdown.c **** 
+  22:Core/Src/countdown.c ****         uint8_t code = segment_code[d[i]];
+  23:Core/Src/countdown.c ****         for (uint8_t j = 0; j < 7; j++)
+  24:Core/Src/countdown.c ****         {
+  25:Core/Src/countdown.c ****             HAL_GPIO_WritePin(GPIOA, LED_ARR[j], ((code >> j) & 0x01) ? GPIO_PIN_SET : GPIO_PIN_RES
+  56              		.loc 1 25 13 is_stmt 1 view .LVU6
+  57              		.loc 1 25 57 is_stmt 0 view .LVU7
+  58 000c 46FA04F2 		asr	r2, r6, r4
+  59              		.loc 1 25 13 view .LVU8
+  60 0010 02F00102 		and	r2, r2, #1
+  61 0014 264B     		ldr	r3, .L16
+  62 0016 33F81410 		ldrh	r1, [r3, r4, lsl #1]
+  63 001a 2648     		ldr	r0, .L16+4
+  64 001c FFF7FEFF 		bl	HAL_GPIO_WritePin
+  65              	.LVL3:
+  23:Core/Src/countdown.c ****         {
+  66              		.loc 1 23 37 is_stmt 1 discriminator 3 view .LVU9
+  67 0020 0134     		adds	r4, r4, #1
+  68              	.LVL4:
+  23:Core/Src/countdown.c ****         {
+  69              		.loc 1 23 37 is_stmt 0 discriminator 3 view .LVU10
+  70 0022 E4B2     		uxtb	r4, r4
+  71              	.LVL5:
+  72              	.L3:
+  23:Core/Src/countdown.c ****         {
+  73              		.loc 1 23 31 is_stmt 1 discriminator 1 view .LVU11
+  74 0024 062C     		cmp	r4, #6
+  75 0026 F1D9     		bls	.L4
+  76              	.LBE4:
+  26:Core/Src/countdown.c ****         }
+  27:Core/Src/countdown.c **** 
+  28:Core/Src/countdown.c ****         if (flag == 1)
+  77              		.loc 1 28 9 view .LVU12
+  78              		.loc 1 28 12 is_stmt 0 view .LVU13
+  79 0028 012F     		cmp	r7, #1
+  80 002a 25D0     		beq	.L13
+  29:Core/Src/countdown.c ****         {
+  30:Core/Src/countdown.c ****             // 显示时钟冒号
+  31:Core/Src/countdown.c ****             HAL_GPIO_WritePin(GPIOA, LED_DP_Pin, (i == 1) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  32:Core/Src/countdown.c ****         }
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 3
+
+
+  33:Core/Src/countdown.c ****         else if (flag == 3)
+  81              		.loc 1 33 14 is_stmt 1 view .LVU14
+  82              		.loc 1 33 17 is_stmt 0 view .LVU15
+  83 002c 032F     		cmp	r7, #3
+  84 002e 33D1     		bne	.L7
+  34:Core/Src/countdown.c ****         {
+  35:Core/Src/countdown.c ****             // 显示时钟冒号
+  36:Core/Src/countdown.c ****             HAL_GPIO_WritePin(GPIOA, LED_DP_Pin, (i == 1 && cd_blink_flag) ? GPIO_PIN_SET : GPIO_PI
+  85              		.loc 1 36 13 is_stmt 1 view .LVU16
+  86              		.loc 1 36 91 is_stmt 0 view .LVU17
+  87 0030 012D     		cmp	r5, #1
+  88 0032 2AD0     		beq	.L14
+  89              		.loc 1 36 91 discriminator 4 view .LVU18
+  90 0034 0022     		movs	r2, #0
+  91              	.L8:
+  92              		.loc 1 36 13 discriminator 6 view .LVU19
+  93 0036 0821     		movs	r1, #8
+  94 0038 1E48     		ldr	r0, .L16+4
+  95 003a FFF7FEFF 		bl	HAL_GPIO_WritePin
+  96              	.LVL6:
+  97              	.L6:
+  37:Core/Src/countdown.c ****         }
+  38:Core/Src/countdown.c ****         else
+  39:Core/Src/countdown.c ****         {
+  40:Core/Src/countdown.c ****             // 显示毫秒小数点
+  41:Core/Src/countdown.c ****             HAL_GPIO_WritePin(GPIOA, LED_DP_Pin, (i == 2) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  42:Core/Src/countdown.c ****         }
+  43:Core/Src/countdown.c **** 
+  44:Core/Src/countdown.c ****         HAL_Delay(2);
+  98              		.loc 1 44 9 is_stmt 1 view .LVU20
+  99 003e 0220     		movs	r0, #2
+ 100 0040 FFF7FEFF 		bl	HAL_Delay
+ 101              	.LVL7:
+ 102              	.LBE3:
+  16:Core/Src/countdown.c ****     {
+ 103              		.loc 1 16 43 discriminator 2 view .LVU21
+ 104 0044 0135     		adds	r5, r5, #1
+ 105              	.LVL8:
+  16:Core/Src/countdown.c ****     {
+ 106              		.loc 1 16 43 is_stmt 0 discriminator 2 view .LVU22
+ 107 0046 EDB2     		uxtb	r5, r5
+ 108              	.LVL9:
+ 109              	.L2:
+  16:Core/Src/countdown.c ****     {
+ 110              		.loc 1 16 27 is_stmt 1 discriminator 1 view .LVU23
+ 111 0048 1B4B     		ldr	r3, .L16+8
+ 112 004a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 113 004c AB42     		cmp	r3, r5
+ 114 004e 2CD9     		bls	.L15
+ 115              	.LBB6:
+  18:Core/Src/countdown.c **** 
+ 116              		.loc 1 18 9 view .LVU24
+ 117 0050 184C     		ldr	r4, .L16+4
+ 118 0052 0122     		movs	r2, #1
+ 119 0054 48F24061 		movw	r1, #34368
+ 120 0058 2046     		mov	r0, r4
+ 121 005a FFF7FEFF 		bl	HAL_GPIO_WritePin
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 4
+
+
+ 122              	.LVL10:
+  20:Core/Src/countdown.c **** 
+ 123              		.loc 1 20 9 view .LVU25
+ 124 005e 0022     		movs	r2, #0
+ 125 0060 164B     		ldr	r3, .L16+12
+ 126 0062 33F81510 		ldrh	r1, [r3, r5, lsl #1]
+ 127 0066 2046     		mov	r0, r4
+ 128 0068 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 129              	.LVL11:
+  22:Core/Src/countdown.c ****         for (uint8_t j = 0; j < 7; j++)
+ 130              		.loc 1 22 9 view .LVU26
+  22:Core/Src/countdown.c ****         for (uint8_t j = 0; j < 7; j++)
+ 131              		.loc 1 22 38 is_stmt 0 view .LVU27
+ 132 006c 18F80530 		ldrb	r3, [r8, r5]	@ zero_extendqisi2
+  22:Core/Src/countdown.c ****         for (uint8_t j = 0; j < 7; j++)
+ 133              		.loc 1 22 17 view .LVU28
+ 134 0070 134A     		ldr	r2, .L16+16
+ 135 0072 D65C     		ldrb	r6, [r2, r3]	@ zero_extendqisi2
+ 136              	.LVL12:
+  23:Core/Src/countdown.c ****         {
+ 137              		.loc 1 23 9 is_stmt 1 view .LVU29
+ 138              	.LBB5:
+  23:Core/Src/countdown.c ****         {
+ 139              		.loc 1 23 14 view .LVU30
+  23:Core/Src/countdown.c ****         {
+ 140              		.loc 1 23 22 is_stmt 0 view .LVU31
+ 141 0074 0024     		movs	r4, #0
+  23:Core/Src/countdown.c ****         {
+ 142              		.loc 1 23 9 view .LVU32
+ 143 0076 D5E7     		b	.L3
+ 144              	.LVL13:
+ 145              	.L13:
+  23:Core/Src/countdown.c ****         {
+ 146              		.loc 1 23 9 view .LVU33
+ 147              	.LBE5:
+  31:Core/Src/countdown.c ****         }
+ 148              		.loc 1 31 13 is_stmt 1 view .LVU34
+ 149 0078 012D     		cmp	r5, #1
+ 150 007a 14BF     		ite	ne
+ 151 007c 0022     		movne	r2, #0
+ 152 007e 0122     		moveq	r2, #1
+ 153 0080 0821     		movs	r1, #8
+ 154 0082 0C48     		ldr	r0, .L16+4
+ 155 0084 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 156              	.LVL14:
+ 157 0088 D9E7     		b	.L6
+ 158              	.L14:
+  36:Core/Src/countdown.c ****         }
+ 159              		.loc 1 36 58 is_stmt 0 discriminator 1 view .LVU35
+ 160 008a 0E4B     		ldr	r3, .L16+20
+ 161 008c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  36:Core/Src/countdown.c ****         }
+ 162              		.loc 1 36 91 discriminator 1 view .LVU36
+ 163 008e 0BB9     		cbnz	r3, .L11
+  36:Core/Src/countdown.c ****         }
+ 164              		.loc 1 36 91 discriminator 4 view .LVU37
+ 165 0090 0022     		movs	r2, #0
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 5
+
+
+ 166 0092 D0E7     		b	.L8
+ 167              	.L11:
+  36:Core/Src/countdown.c ****         }
+ 168              		.loc 1 36 91 discriminator 3 view .LVU38
+ 169 0094 0122     		movs	r2, #1
+ 170 0096 CEE7     		b	.L8
+ 171              	.L7:
+  41:Core/Src/countdown.c ****         }
+ 172              		.loc 1 41 13 is_stmt 1 view .LVU39
+ 173 0098 022D     		cmp	r5, #2
+ 174 009a 14BF     		ite	ne
+ 175 009c 0022     		movne	r2, #0
+ 176 009e 0122     		moveq	r2, #1
+ 177 00a0 0821     		movs	r1, #8
+ 178 00a2 0448     		ldr	r0, .L16+4
+ 179 00a4 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 180              	.LVL15:
+ 181 00a8 C9E7     		b	.L6
+ 182              	.LVL16:
+ 183              	.L15:
+  41:Core/Src/countdown.c ****         }
+ 184              		.loc 1 41 13 is_stmt 0 view .LVU40
+ 185              	.LBE6:
+ 186              	.LBE2:
+  45:Core/Src/countdown.c ****     }
+  46:Core/Src/countdown.c **** }
+ 187              		.loc 1 46 1 view .LVU41
+ 188 00aa BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 189              	.LVL17:
+ 190              	.L17:
+ 191              		.loc 1 46 1 view .LVU42
+ 192 00ae 00BF     		.align	2
+ 193              	.L16:
+ 194 00b0 00000000 		.word	LED_ARR
+ 195 00b4 00080140 		.word	1073809408
+ 196 00b8 00000000 		.word	DIGIT_COUNT
+ 197 00bc 00000000 		.word	DIGIT_ARR
+ 198 00c0 00000000 		.word	segment_code
+ 199 00c4 00000000 		.word	cd_blink_flag
+ 200              		.cfi_endproc
+ 201              	.LFE65:
+ 203              		.section	.text.blink_control_countdown,"ax",%progbits
+ 204              		.align	1
+ 205              		.global	blink_control_countdown
+ 206              		.syntax unified
+ 207              		.thumb
+ 208              		.thumb_func
+ 210              	blink_control_countdown:
+ 211              	.LFB67:
+  47:Core/Src/countdown.c **** 
+  48:Core/Src/countdown.c **** void run_countdown()
+  49:Core/Src/countdown.c **** {
+  50:Core/Src/countdown.c ****     uint8_t d[4] = {0};
+  51:Core/Src/countdown.c ****     // 格式标识
+  52:Core/Src/countdown.c ****     uint8_t flag = 1;
+  53:Core/Src/countdown.c **** 
+  54:Core/Src/countdown.c ****     if (countdownState == STATE_SETTING_MIN)
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 6
+
+
+  55:Core/Src/countdown.c ****     {
+  56:Core/Src/countdown.c ****         // 设置分钟时，闪烁第一、二位，其他正常显示当前设置的秒数
+  57:Core/Src/countdown.c ****         if (cd_blink_flag)
+  58:Core/Src/countdown.c ****         {
+  59:Core/Src/countdown.c ****             // 隐藏分钟
+  60:Core/Src/countdown.c ****             d[0] = 10;
+  61:Core/Src/countdown.c ****             d[1] = 10;
+  62:Core/Src/countdown.c ****         }
+  63:Core/Src/countdown.c ****         else
+  64:Core/Src/countdown.c ****         {
+  65:Core/Src/countdown.c ****             d[0] = setMinutes / 10;
+  66:Core/Src/countdown.c ****             d[1] = setMinutes % 10;
+  67:Core/Src/countdown.c ****         }
+  68:Core/Src/countdown.c ****         d[2] = setSeconds / 10;
+  69:Core/Src/countdown.c ****         d[3] = setSeconds % 10;
+  70:Core/Src/countdown.c ****     }
+  71:Core/Src/countdown.c ****     else if (countdownState == STATE_SETTING_SEC)
+  72:Core/Src/countdown.c ****     {
+  73:Core/Src/countdown.c ****         // 设置秒钟时，闪烁第三、四位，分钟正常显示
+  74:Core/Src/countdown.c ****         d[0] = setMinutes / 10;
+  75:Core/Src/countdown.c ****         d[1] = setMinutes % 10;
+  76:Core/Src/countdown.c ****         if (cd_blink_flag)
+  77:Core/Src/countdown.c ****         {
+  78:Core/Src/countdown.c ****             // 隐藏秒钟
+  79:Core/Src/countdown.c ****             d[2] = 10;
+  80:Core/Src/countdown.c ****             d[3] = 10;
+  81:Core/Src/countdown.c ****         }
+  82:Core/Src/countdown.c ****         else
+  83:Core/Src/countdown.c ****         {
+  84:Core/Src/countdown.c ****             d[2] = setSeconds / 10;
+  85:Core/Src/countdown.c ****             d[3] = setSeconds % 10;
+  86:Core/Src/countdown.c ****         }
+  87:Core/Src/countdown.c ****     }
+  88:Core/Src/countdown.c ****     else if (countdownState == STATE_COUNTDOWN || countdownState == STATE_STOP)
+  89:Core/Src/countdown.c ****     {
+  90:Core/Src/countdown.c ****         // 倒计时运行时，根据剩余时间显示不同格式
+  91:Core/Src/countdown.c ****         if (countdownTime >= 10 * 60 * 1000UL)
+  92:Core/Src/countdown.c ****         { // >= 10分钟
+  93:Core/Src/countdown.c ****             uint32_t totalSec = countdownTime / 1000;
+  94:Core/Src/countdown.c ****             uint8_t minutes = totalSec / 60;
+  95:Core/Src/countdown.c ****             uint8_t seconds = totalSec % 60;
+  96:Core/Src/countdown.c ****             d[0] = minutes / 10;
+  97:Core/Src/countdown.c ****             d[1] = minutes % 10;
+  98:Core/Src/countdown.c ****             d[2] = seconds / 10;
+  99:Core/Src/countdown.c ****             d[3] = seconds % 10;
+ 100:Core/Src/countdown.c ****             flag = 1;
+ 101:Core/Src/countdown.c ****         }
+ 102:Core/Src/countdown.c ****         else
+ 103:Core/Src/countdown.c ****         { // 10分钟以内：第一位分钟，第二、三位秒，第四位为毫秒的十分位
+ 104:Core/Src/countdown.c ****             uint32_t totalSec = countdownTime / 1000;
+ 105:Core/Src/countdown.c ****             uint8_t minute = totalSec / 60;
+ 106:Core/Src/countdown.c ****             uint8_t second = totalSec % 60;
+ 107:Core/Src/countdown.c ****             // 毫秒部分（取十分位）
+ 108:Core/Src/countdown.c ****             uint8_t ms = (countdownTime % 1000) / 100;
+ 109:Core/Src/countdown.c ****             d[0] = minute; // 注意：此处只显示个位分钟（若分钟超过9可能需调�
+ 110:Core/Src/countdown.c ****             d[1] = second / 10;
+ 111:Core/Src/countdown.c ****             d[2] = second % 10;
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 7
+
+
+ 112:Core/Src/countdown.c ****             d[3] = ms;
+ 113:Core/Src/countdown.c ****             flag = 2;
+ 114:Core/Src/countdown.c ****         }
+ 115:Core/Src/countdown.c ****     }
+ 116:Core/Src/countdown.c ****     else if (countdownState == STATE_FINISHED)
+ 117:Core/Src/countdown.c ****     {
+ 118:Core/Src/countdown.c ****         // 倒计时结束，闪烁全0
+ 119:Core/Src/countdown.c ****         if (cd_blink_flag)
+ 120:Core/Src/countdown.c ****         {
+ 121:Core/Src/countdown.c ****             d[0] = d[1] = d[2] = d[3] = 0;
+ 122:Core/Src/countdown.c ****         }
+ 123:Core/Src/countdown.c ****         else
+ 124:Core/Src/countdown.c ****         {
+ 125:Core/Src/countdown.c ****             d[0] = d[1] = d[2] = d[3] = 10; // 不显示（闪烁）
+ 126:Core/Src/countdown.c ****         }
+ 127:Core/Src/countdown.c ****         flag = 3;
+ 128:Core/Src/countdown.c ****     }
+ 129:Core/Src/countdown.c ****     else
+ 130:Core/Src/countdown.c ****     { // STATE_IDLE 正常显示倒计时时间（未启动倒计时）
+ 131:Core/Src/countdown.c ****         d[0] = setMinutes / 10;
+ 132:Core/Src/countdown.c ****         d[1] = setMinutes % 10;
+ 133:Core/Src/countdown.c ****         d[2] = setSeconds / 10;
+ 134:Core/Src/countdown.c ****         d[3] = setSeconds % 10;
+ 135:Core/Src/countdown.c ****     }
+ 136:Core/Src/countdown.c **** 
+ 137:Core/Src/countdown.c ****     display_countdown(d, flag);
+ 138:Core/Src/countdown.c **** 
+ 139:Core/Src/countdown.c ****     // 闪烁
+ 140:Core/Src/countdown.c ****     blink_control_countdown();
+ 141:Core/Src/countdown.c **** }
+ 142:Core/Src/countdown.c **** 
+ 143:Core/Src/countdown.c **** void blink_control_countdown()
+ 144:Core/Src/countdown.c **** {
+ 212              		.loc 1 144 1 is_stmt 1 view -0
+ 213              		.cfi_startproc
+ 214              		@ args = 0, pretend = 0, frame = 0
+ 215              		@ frame_needed = 0, uses_anonymous_args = 0
+ 216 0000 08B5     		push	{r3, lr}
+ 217              	.LCFI1:
+ 218              		.cfi_def_cfa_offset 8
+ 219              		.cfi_offset 3, -8
+ 220              		.cfi_offset 14, -4
+ 145:Core/Src/countdown.c ****     static uint32_t last_blink_time = 0;
+ 221              		.loc 1 145 5 view .LVU44
+ 146:Core/Src/countdown.c ****     if (HAL_GetTick() - last_blink_time >= 500)
+ 222              		.loc 1 146 5 view .LVU45
+ 223              		.loc 1 146 9 is_stmt 0 view .LVU46
+ 224 0002 FFF7FEFF 		bl	HAL_GetTick
+ 225              	.LVL18:
+ 226              		.loc 1 146 23 discriminator 1 view .LVU47
+ 227 0006 094B     		ldr	r3, .L22
+ 228 0008 1B68     		ldr	r3, [r3]
+ 229 000a C01A     		subs	r0, r0, r3
+ 230              		.loc 1 146 8 discriminator 1 view .LVU48
+ 231 000c B0F5FA7F 		cmp	r0, #500
+ 232 0010 00D2     		bcs	.L21
+ 233              	.L18:
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 8
+
+
+ 147:Core/Src/countdown.c ****     {
+ 148:Core/Src/countdown.c ****         cd_blink_flag = !cd_blink_flag; // 切换闪烁状态
+ 149:Core/Src/countdown.c ****         last_blink_time = HAL_GetTick();
+ 150:Core/Src/countdown.c ****     }
+ 151:Core/Src/countdown.c **** }
+ 234              		.loc 1 151 1 view .LVU49
+ 235 0012 08BD     		pop	{r3, pc}
+ 236              	.L21:
+ 148:Core/Src/countdown.c ****         last_blink_time = HAL_GetTick();
+ 237              		.loc 1 148 9 is_stmt 1 view .LVU50
+ 148:Core/Src/countdown.c ****         last_blink_time = HAL_GetTick();
+ 238              		.loc 1 148 25 is_stmt 0 view .LVU51
+ 239 0014 064A     		ldr	r2, .L22+4
+ 240 0016 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 241 0018 B3FA83F3 		clz	r3, r3
+ 242 001c 5B09     		lsrs	r3, r3, #5
+ 148:Core/Src/countdown.c ****         last_blink_time = HAL_GetTick();
+ 243              		.loc 1 148 23 view .LVU52
+ 244 001e 1370     		strb	r3, [r2]
+ 149:Core/Src/countdown.c ****     }
+ 245              		.loc 1 149 9 is_stmt 1 view .LVU53
+ 149:Core/Src/countdown.c ****     }
+ 246              		.loc 1 149 27 is_stmt 0 view .LVU54
+ 247 0020 FFF7FEFF 		bl	HAL_GetTick
+ 248              	.LVL19:
+ 149:Core/Src/countdown.c ****     }
+ 249              		.loc 1 149 25 discriminator 1 view .LVU55
+ 250 0024 014B     		ldr	r3, .L22
+ 251 0026 1860     		str	r0, [r3]
+ 252              		.loc 1 151 1 view .LVU56
+ 253 0028 F3E7     		b	.L18
+ 254              	.L23:
+ 255 002a 00BF     		.align	2
+ 256              	.L22:
+ 257 002c 00000000 		.word	last_blink_time.0
+ 258 0030 00000000 		.word	cd_blink_flag
+ 259              		.cfi_endproc
+ 260              	.LFE67:
+ 262              		.section	.text.run_countdown,"ax",%progbits
+ 263              		.align	1
+ 264              		.global	run_countdown
+ 265              		.syntax unified
+ 266              		.thumb
+ 267              		.thumb_func
+ 269              	run_countdown:
+ 270              	.LFB66:
+  49:Core/Src/countdown.c ****     uint8_t d[4] = {0};
+ 271              		.loc 1 49 1 is_stmt 1 view -0
+ 272              		.cfi_startproc
+ 273              		@ args = 0, pretend = 0, frame = 8
+ 274              		@ frame_needed = 0, uses_anonymous_args = 0
+ 275 0000 10B5     		push	{r4, lr}
+ 276              	.LCFI2:
+ 277              		.cfi_def_cfa_offset 8
+ 278              		.cfi_offset 4, -8
+ 279              		.cfi_offset 14, -4
+ 280 0002 82B0     		sub	sp, sp, #8
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 9
+
+
+ 281              	.LCFI3:
+ 282              		.cfi_def_cfa_offset 16
+  50:Core/Src/countdown.c ****     // 格式标识
+ 283              		.loc 1 50 5 view .LVU58
+  50:Core/Src/countdown.c ****     // 格式标识
+ 284              		.loc 1 50 13 is_stmt 0 view .LVU59
+ 285 0004 0023     		movs	r3, #0
+ 286 0006 0193     		str	r3, [sp, #4]
+  52:Core/Src/countdown.c **** 
+ 287              		.loc 1 52 5 is_stmt 1 view .LVU60
+ 288              	.LVL20:
+  54:Core/Src/countdown.c ****     {
+ 289              		.loc 1 54 5 view .LVU61
+  54:Core/Src/countdown.c ****     {
+ 290              		.loc 1 54 24 is_stmt 0 view .LVU62
+ 291 0008 8D4B     		ldr	r3, .L40
+ 292 000a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  54:Core/Src/countdown.c ****     {
+ 293              		.loc 1 54 8 view .LVU63
+ 294 000c 012B     		cmp	r3, #1
+ 295 000e 3BD0     		beq	.L37
+  71:Core/Src/countdown.c ****     {
+ 296              		.loc 1 71 10 is_stmt 1 view .LVU64
+  71:Core/Src/countdown.c ****     {
+ 297              		.loc 1 71 29 is_stmt 0 view .LVU65
+ 298 0010 8B4B     		ldr	r3, .L40
+ 299 0012 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  71:Core/Src/countdown.c ****     {
+ 300              		.loc 1 71 13 view .LVU66
+ 301 0014 022B     		cmp	r3, #2
+ 302 0016 70D0     		beq	.L38
+  88:Core/Src/countdown.c ****     {
+ 303              		.loc 1 88 10 is_stmt 1 view .LVU67
+  88:Core/Src/countdown.c ****     {
+ 304              		.loc 1 88 29 is_stmt 0 view .LVU68
+ 305 0018 894B     		ldr	r3, .L40
+ 306 001a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  88:Core/Src/countdown.c ****     {
+ 307              		.loc 1 88 13 view .LVU69
+ 308 001c 032B     		cmp	r3, #3
+ 309 001e 00F0A080 		beq	.L31
+  88:Core/Src/countdown.c ****     {
+ 310              		.loc 1 88 66 discriminator 1 view .LVU70
+ 311 0022 874B     		ldr	r3, .L40
+ 312 0024 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  88:Core/Src/countdown.c ****     {
+ 313              		.loc 1 88 48 discriminator 1 view .LVU71
+ 314 0026 042B     		cmp	r3, #4
+ 315 0028 00F09B80 		beq	.L31
+ 116:Core/Src/countdown.c ****     {
+ 316              		.loc 1 116 10 is_stmt 1 view .LVU72
+ 116:Core/Src/countdown.c ****     {
+ 317              		.loc 1 116 29 is_stmt 0 view .LVU73
+ 318 002c 844B     		ldr	r3, .L40
+ 319 002e 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 116:Core/Src/countdown.c ****     {
+ 320              		.loc 1 116 13 view .LVU74
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 10
+
+
+ 321 0030 052B     		cmp	r3, #5
+ 322 0032 00F0F580 		beq	.L39
+ 131:Core/Src/countdown.c ****         d[1] = setMinutes % 10;
+ 323              		.loc 1 131 9 is_stmt 1 view .LVU75
+ 131:Core/Src/countdown.c ****         d[1] = setMinutes % 10;
+ 324              		.loc 1 131 14 is_stmt 0 view .LVU76
+ 325 0036 8349     		ldr	r1, .L40+4
+ 326 0038 0A78     		ldrb	r2, [r1]	@ zero_extendqisi2
+ 327 003a D2B2     		uxtb	r2, r2
+ 328 003c 824B     		ldr	r3, .L40+8
+ 329 003e A3FB0202 		umull	r0, r2, r3, r2
+ 330 0042 D208     		lsrs	r2, r2, #3
+ 331 0044 8DF80420 		strb	r2, [sp, #4]
+ 132:Core/Src/countdown.c ****         d[2] = setSeconds / 10;
+ 332              		.loc 1 132 9 is_stmt 1 view .LVU77
+ 132:Core/Src/countdown.c ****         d[2] = setSeconds / 10;
+ 333              		.loc 1 132 14 is_stmt 0 view .LVU78
+ 334 0048 0978     		ldrb	r1, [r1]	@ zero_extendqisi2
+ 335 004a C9B2     		uxtb	r1, r1
+ 336 004c A3FB0102 		umull	r0, r2, r3, r1
+ 337 0050 D208     		lsrs	r2, r2, #3
+ 338 0052 02EB8202 		add	r2, r2, r2, lsl #2
+ 339 0056 5000     		lsls	r0, r2, #1
+ 340 0058 091A     		subs	r1, r1, r0
+ 341 005a 8DF80510 		strb	r1, [sp, #5]
+ 133:Core/Src/countdown.c ****         d[3] = setSeconds % 10;
+ 342              		.loc 1 133 9 is_stmt 1 view .LVU79
+ 133:Core/Src/countdown.c ****         d[3] = setSeconds % 10;
+ 343              		.loc 1 133 14 is_stmt 0 view .LVU80
+ 344 005e 7B49     		ldr	r1, .L40+12
+ 345 0060 0A78     		ldrb	r2, [r1]	@ zero_extendqisi2
+ 346 0062 D2B2     		uxtb	r2, r2
+ 347 0064 A3FB0202 		umull	r0, r2, r3, r2
+ 348 0068 D208     		lsrs	r2, r2, #3
+ 349 006a 8DF80620 		strb	r2, [sp, #6]
+ 134:Core/Src/countdown.c ****     }
+ 350              		.loc 1 134 9 is_stmt 1 view .LVU81
+ 134:Core/Src/countdown.c ****     }
+ 351              		.loc 1 134 14 is_stmt 0 view .LVU82
+ 352 006e 0A78     		ldrb	r2, [r1]	@ zero_extendqisi2
+ 353 0070 D2B2     		uxtb	r2, r2
+ 354 0072 A3FB0213 		umull	r1, r3, r3, r2
+ 355 0076 DB08     		lsrs	r3, r3, #3
+ 356 0078 03EB8303 		add	r3, r3, r3, lsl #2
+ 357 007c 5900     		lsls	r1, r3, #1
+ 358 007e 521A     		subs	r2, r2, r1
+ 359 0080 8DF80720 		strb	r2, [sp, #7]
+  52:Core/Src/countdown.c **** 
+ 360              		.loc 1 52 13 view .LVU83
+ 361 0084 0121     		movs	r1, #1
+ 362 0086 1CE0     		b	.L28
+ 363              	.L37:
+ 364 0088 D9B2     		uxtb	r1, r3
+  57:Core/Src/countdown.c ****         {
+ 365              		.loc 1 57 9 is_stmt 1 view .LVU84
+  57:Core/Src/countdown.c ****         {
+ 366              		.loc 1 57 13 is_stmt 0 view .LVU85
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 11
+
+
+ 367 008a 714B     		ldr	r3, .L40+16
+ 368 008c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  57:Core/Src/countdown.c ****         {
+ 369              		.loc 1 57 12 view .LVU86
+ 370 008e FBB1     		cbz	r3, .L26
+  60:Core/Src/countdown.c ****             d[1] = 10;
+ 371              		.loc 1 60 13 is_stmt 1 view .LVU87
+  60:Core/Src/countdown.c ****             d[1] = 10;
+ 372              		.loc 1 60 18 is_stmt 0 view .LVU88
+ 373 0090 0A23     		movs	r3, #10
+ 374 0092 8DF80430 		strb	r3, [sp, #4]
+  61:Core/Src/countdown.c ****         }
+ 375              		.loc 1 61 13 is_stmt 1 view .LVU89
+  61:Core/Src/countdown.c ****         }
+ 376              		.loc 1 61 18 is_stmt 0 view .LVU90
+ 377 0096 8DF80530 		strb	r3, [sp, #5]
+ 378              	.L27:
+  68:Core/Src/countdown.c ****         d[3] = setSeconds % 10;
+ 379              		.loc 1 68 9 is_stmt 1 view .LVU91
+  68:Core/Src/countdown.c ****         d[3] = setSeconds % 10;
+ 380              		.loc 1 68 14 is_stmt 0 view .LVU92
+ 381 009a 6C48     		ldr	r0, .L40+12
+ 382 009c 0278     		ldrb	r2, [r0]	@ zero_extendqisi2
+ 383 009e D2B2     		uxtb	r2, r2
+ 384 00a0 694B     		ldr	r3, .L40+8
+ 385 00a2 A3FB0242 		umull	r4, r2, r3, r2
+ 386 00a6 D208     		lsrs	r2, r2, #3
+ 387 00a8 8DF80620 		strb	r2, [sp, #6]
+  69:Core/Src/countdown.c ****     }
+ 388              		.loc 1 69 9 is_stmt 1 view .LVU93
+  69:Core/Src/countdown.c ****     }
+ 389              		.loc 1 69 14 is_stmt 0 view .LVU94
+ 390 00ac 0278     		ldrb	r2, [r0]	@ zero_extendqisi2
+ 391 00ae D2B2     		uxtb	r2, r2
+ 392 00b0 A3FB0203 		umull	r0, r3, r3, r2
+ 393 00b4 DB08     		lsrs	r3, r3, #3
+ 394 00b6 03EB8303 		add	r3, r3, r3, lsl #2
+ 395 00ba 5800     		lsls	r0, r3, #1
+ 396 00bc 121A     		subs	r2, r2, r0
+ 397 00be 8DF80720 		strb	r2, [sp, #7]
+ 398              	.LVL21:
+ 399              	.L28:
+ 137:Core/Src/countdown.c **** 
+ 400              		.loc 1 137 5 is_stmt 1 view .LVU95
+ 401 00c2 01A8     		add	r0, sp, #4
+ 402 00c4 FFF7FEFF 		bl	display_countdown
+ 403              	.LVL22:
+ 140:Core/Src/countdown.c **** }
+ 404              		.loc 1 140 5 view .LVU96
+ 405 00c8 FFF7FEFF 		bl	blink_control_countdown
+ 406              	.LVL23:
+ 141:Core/Src/countdown.c **** 
+ 407              		.loc 1 141 1 is_stmt 0 view .LVU97
+ 408 00cc 02B0     		add	sp, sp, #8
+ 409              	.LCFI4:
+ 410              		.cfi_remember_state
+ 411              		.cfi_def_cfa_offset 8
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 12
+
+
+ 412              		@ sp needed
+ 413 00ce 10BD     		pop	{r4, pc}
+ 414              	.LVL24:
+ 415              	.L26:
+ 416              	.LCFI5:
+ 417              		.cfi_restore_state
+  65:Core/Src/countdown.c ****             d[1] = setMinutes % 10;
+ 418              		.loc 1 65 13 is_stmt 1 view .LVU98
+  65:Core/Src/countdown.c ****             d[1] = setMinutes % 10;
+ 419              		.loc 1 65 18 is_stmt 0 view .LVU99
+ 420 00d0 5C48     		ldr	r0, .L40+4
+ 421 00d2 0278     		ldrb	r2, [r0]	@ zero_extendqisi2
+ 422 00d4 D2B2     		uxtb	r2, r2
+ 423 00d6 5C4B     		ldr	r3, .L40+8
+ 424 00d8 A3FB0242 		umull	r4, r2, r3, r2
+ 425 00dc D208     		lsrs	r2, r2, #3
+ 426 00de 8DF80420 		strb	r2, [sp, #4]
+  66:Core/Src/countdown.c ****         }
+ 427              		.loc 1 66 13 is_stmt 1 view .LVU100
+  66:Core/Src/countdown.c ****         }
+ 428              		.loc 1 66 18 is_stmt 0 view .LVU101
+ 429 00e2 0278     		ldrb	r2, [r0]	@ zero_extendqisi2
+ 430 00e4 D2B2     		uxtb	r2, r2
+ 431 00e6 A3FB0203 		umull	r0, r3, r3, r2
+ 432 00ea DB08     		lsrs	r3, r3, #3
+ 433 00ec 03EB8303 		add	r3, r3, r3, lsl #2
+ 434 00f0 5800     		lsls	r0, r3, #1
+ 435 00f2 121A     		subs	r2, r2, r0
+ 436 00f4 8DF80520 		strb	r2, [sp, #5]
+ 437 00f8 CFE7     		b	.L27
+ 438              	.L38:
+  74:Core/Src/countdown.c ****         d[1] = setMinutes % 10;
+ 439              		.loc 1 74 9 is_stmt 1 view .LVU102
+  74:Core/Src/countdown.c ****         d[1] = setMinutes % 10;
+ 440              		.loc 1 74 14 is_stmt 0 view .LVU103
+ 441 00fa 5249     		ldr	r1, .L40+4
+ 442 00fc 0A78     		ldrb	r2, [r1]	@ zero_extendqisi2
+ 443 00fe D2B2     		uxtb	r2, r2
+ 444 0100 514B     		ldr	r3, .L40+8
+ 445 0102 A3FB0202 		umull	r0, r2, r3, r2
+ 446 0106 D208     		lsrs	r2, r2, #3
+ 447 0108 8DF80420 		strb	r2, [sp, #4]
+  75:Core/Src/countdown.c ****         if (cd_blink_flag)
+ 448              		.loc 1 75 9 is_stmt 1 view .LVU104
+  75:Core/Src/countdown.c ****         if (cd_blink_flag)
+ 449              		.loc 1 75 14 is_stmt 0 view .LVU105
+ 450 010c 0A78     		ldrb	r2, [r1]	@ zero_extendqisi2
+ 451 010e D2B2     		uxtb	r2, r2
+ 452 0110 A3FB0213 		umull	r1, r3, r3, r2
+ 453 0114 DB08     		lsrs	r3, r3, #3
+ 454 0116 03EB8303 		add	r3, r3, r3, lsl #2
+ 455 011a 5900     		lsls	r1, r3, #1
+ 456 011c 521A     		subs	r2, r2, r1
+ 457 011e 8DF80520 		strb	r2, [sp, #5]
+  76:Core/Src/countdown.c ****         {
+ 458              		.loc 1 76 9 is_stmt 1 view .LVU106
+  76:Core/Src/countdown.c ****         {
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 13
+
+
+ 459              		.loc 1 76 13 is_stmt 0 view .LVU107
+ 460 0122 4B4B     		ldr	r3, .L40+16
+ 461 0124 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  76:Core/Src/countdown.c ****         {
+ 462              		.loc 1 76 12 view .LVU108
+ 463 0126 33B1     		cbz	r3, .L30
+  79:Core/Src/countdown.c ****             d[3] = 10;
+ 464              		.loc 1 79 13 is_stmt 1 view .LVU109
+  79:Core/Src/countdown.c ****             d[3] = 10;
+ 465              		.loc 1 79 18 is_stmt 0 view .LVU110
+ 466 0128 0A23     		movs	r3, #10
+ 467 012a 8DF80630 		strb	r3, [sp, #6]
+  80:Core/Src/countdown.c ****         }
+ 468              		.loc 1 80 13 is_stmt 1 view .LVU111
+  80:Core/Src/countdown.c ****         }
+ 469              		.loc 1 80 18 is_stmt 0 view .LVU112
+ 470 012e 8DF80730 		strb	r3, [sp, #7]
+  52:Core/Src/countdown.c **** 
+ 471              		.loc 1 52 13 view .LVU113
+ 472 0132 0121     		movs	r1, #1
+ 473 0134 C5E7     		b	.L28
+ 474              	.L30:
+  84:Core/Src/countdown.c ****             d[3] = setSeconds % 10;
+ 475              		.loc 1 84 13 is_stmt 1 view .LVU114
+  84:Core/Src/countdown.c ****             d[3] = setSeconds % 10;
+ 476              		.loc 1 84 18 is_stmt 0 view .LVU115
+ 477 0136 4549     		ldr	r1, .L40+12
+ 478 0138 0A78     		ldrb	r2, [r1]	@ zero_extendqisi2
+ 479 013a D2B2     		uxtb	r2, r2
+ 480 013c 424B     		ldr	r3, .L40+8
+ 481 013e A3FB0202 		umull	r0, r2, r3, r2
+ 482 0142 D208     		lsrs	r2, r2, #3
+ 483 0144 8DF80620 		strb	r2, [sp, #6]
+  85:Core/Src/countdown.c ****         }
+ 484              		.loc 1 85 13 is_stmt 1 view .LVU116
+  85:Core/Src/countdown.c ****         }
+ 485              		.loc 1 85 18 is_stmt 0 view .LVU117
+ 486 0148 0A78     		ldrb	r2, [r1]	@ zero_extendqisi2
+ 487 014a D2B2     		uxtb	r2, r2
+ 488 014c A3FB0213 		umull	r1, r3, r3, r2
+ 489 0150 DB08     		lsrs	r3, r3, #3
+ 490 0152 03EB8303 		add	r3, r3, r3, lsl #2
+ 491 0156 5900     		lsls	r1, r3, #1
+ 492 0158 521A     		subs	r2, r2, r1
+ 493 015a 8DF80720 		strb	r2, [sp, #7]
+  52:Core/Src/countdown.c **** 
+ 494              		.loc 1 52 13 view .LVU118
+ 495 015e 0121     		movs	r1, #1
+ 496 0160 AFE7     		b	.L28
+ 497              	.L31:
+  91:Core/Src/countdown.c ****         { // >= 10分钟
+ 498              		.loc 1 91 9 is_stmt 1 view .LVU119
+  91:Core/Src/countdown.c ****         { // >= 10分钟
+ 499              		.loc 1 91 27 is_stmt 0 view .LVU120
+ 500 0162 3C4B     		ldr	r3, .L40+20
+ 501 0164 1A68     		ldr	r2, [r3]
+  91:Core/Src/countdown.c ****         { // >= 10分钟
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 14
+
+
+ 502              		.loc 1 91 12 view .LVU121
+ 503 0166 3C4B     		ldr	r3, .L40+24
+ 504 0168 9A42     		cmp	r2, r3
+ 505 016a 29D9     		bls	.L33
+ 506              	.LBB7:
+  93:Core/Src/countdown.c ****             uint8_t minutes = totalSec / 60;
+ 507              		.loc 1 93 13 is_stmt 1 view .LVU122
+  93:Core/Src/countdown.c ****             uint8_t minutes = totalSec / 60;
+ 508              		.loc 1 93 47 is_stmt 0 view .LVU123
+ 509 016c 394B     		ldr	r3, .L40+20
+ 510 016e 1B68     		ldr	r3, [r3]
+  93:Core/Src/countdown.c ****             uint8_t minutes = totalSec / 60;
+ 511              		.loc 1 93 22 view .LVU124
+ 512 0170 3A4A     		ldr	r2, .L40+28
+ 513 0172 A2FB0323 		umull	r2, r3, r2, r3
+ 514 0176 9B09     		lsrs	r3, r3, #6
+ 515              	.LVL25:
+  94:Core/Src/countdown.c ****             uint8_t seconds = totalSec % 60;
+ 516              		.loc 1 94 13 is_stmt 1 view .LVU125
+  94:Core/Src/countdown.c ****             uint8_t seconds = totalSec % 60;
+ 517              		.loc 1 94 40 is_stmt 0 view .LVU126
+ 518 0178 3949     		ldr	r1, .L40+32
+ 519 017a A1FB0321 		umull	r2, r1, r1, r3
+ 520 017e 4809     		lsrs	r0, r1, #5
+  94:Core/Src/countdown.c ****             uint8_t seconds = totalSec % 60;
+ 521              		.loc 1 94 21 view .LVU127
+ 522 0180 C1F34711 		ubfx	r1, r1, #5, #8
+ 523              	.LVL26:
+  95:Core/Src/countdown.c ****             d[0] = minutes / 10;
+ 524              		.loc 1 95 13 is_stmt 1 view .LVU128
+  95:Core/Src/countdown.c ****             d[0] = minutes / 10;
+ 525              		.loc 1 95 40 is_stmt 0 view .LVU129
+ 526 0184 C0EB0010 		rsb	r0, r0, r0, lsl #4
+ 527 0188 8200     		lsls	r2, r0, #2
+ 528 018a 9A1A     		subs	r2, r3, r2
+  95:Core/Src/countdown.c ****             d[0] = minutes / 10;
+ 529              		.loc 1 95 21 view .LVU130
+ 530 018c D2B2     		uxtb	r2, r2
+ 531              	.LVL27:
+  96:Core/Src/countdown.c ****             d[1] = minutes % 10;
+ 532              		.loc 1 96 13 is_stmt 1 view .LVU131
+  96:Core/Src/countdown.c ****             d[1] = minutes % 10;
+ 533              		.loc 1 96 18 is_stmt 0 view .LVU132
+ 534 018e 2E4B     		ldr	r3, .L40+8
+ 535              	.LVL28:
+  96:Core/Src/countdown.c ****             d[1] = minutes % 10;
+ 536              		.loc 1 96 18 view .LVU133
+ 537 0190 A3FB0140 		umull	r4, r0, r3, r1
+ 538 0194 C008     		lsrs	r0, r0, #3
+ 539 0196 8DF80400 		strb	r0, [sp, #4]
+  97:Core/Src/countdown.c ****             d[2] = seconds / 10;
+ 540              		.loc 1 97 13 is_stmt 1 view .LVU134
+  97:Core/Src/countdown.c ****             d[2] = seconds / 10;
+ 541              		.loc 1 97 18 is_stmt 0 view .LVU135
+ 542 019a 00EB8000 		add	r0, r0, r0, lsl #2
+ 543 019e 4400     		lsls	r4, r0, #1
+ 544 01a0 091B     		subs	r1, r1, r4
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 15
+
+
+ 545              	.LVL29:
+  97:Core/Src/countdown.c ****             d[2] = seconds / 10;
+ 546              		.loc 1 97 18 view .LVU136
+ 547 01a2 8DF80510 		strb	r1, [sp, #5]
+  98:Core/Src/countdown.c ****             d[3] = seconds % 10;
+ 548              		.loc 1 98 13 is_stmt 1 view .LVU137
+  98:Core/Src/countdown.c ****             d[3] = seconds % 10;
+ 549              		.loc 1 98 18 is_stmt 0 view .LVU138
+ 550 01a6 A3FB0213 		umull	r1, r3, r3, r2
+ 551 01aa DB08     		lsrs	r3, r3, #3
+ 552 01ac 8DF80630 		strb	r3, [sp, #6]
+  99:Core/Src/countdown.c ****             flag = 1;
+ 553              		.loc 1 99 13 is_stmt 1 view .LVU139
+  99:Core/Src/countdown.c ****             flag = 1;
+ 554              		.loc 1 99 18 is_stmt 0 view .LVU140
+ 555 01b0 03EB8303 		add	r3, r3, r3, lsl #2
+ 556 01b4 5900     		lsls	r1, r3, #1
+ 557 01b6 521A     		subs	r2, r2, r1
+ 558              	.LVL30:
+  99:Core/Src/countdown.c ****             flag = 1;
+ 559              		.loc 1 99 18 view .LVU141
+ 560 01b8 8DF80720 		strb	r2, [sp, #7]
+ 100:Core/Src/countdown.c ****         }
+ 561              		.loc 1 100 13 is_stmt 1 view .LVU142
+ 100:Core/Src/countdown.c ****         }
+ 562              		.loc 1 100 18 is_stmt 0 view .LVU143
+ 563 01bc 0121     		movs	r1, #1
+ 564              	.LBE7:
+ 565 01be 80E7     		b	.L28
+ 566              	.LVL31:
+ 567              	.L33:
+ 568              	.LBB8:
+ 104:Core/Src/countdown.c ****             uint8_t minute = totalSec / 60;
+ 569              		.loc 1 104 13 is_stmt 1 view .LVU144
+ 104:Core/Src/countdown.c ****             uint8_t minute = totalSec / 60;
+ 570              		.loc 1 104 47 is_stmt 0 view .LVU145
+ 571 01c0 244C     		ldr	r4, .L40+20
+ 572 01c2 2168     		ldr	r1, [r4]
+ 104:Core/Src/countdown.c ****             uint8_t minute = totalSec / 60;
+ 573              		.loc 1 104 22 view .LVU146
+ 574 01c4 254B     		ldr	r3, .L40+28
+ 575 01c6 A3FB0121 		umull	r2, r1, r3, r1
+ 576 01ca 8909     		lsrs	r1, r1, #6
+ 577              	.LVL32:
+ 105:Core/Src/countdown.c ****             uint8_t second = totalSec % 60;
+ 578              		.loc 1 105 13 is_stmt 1 view .LVU147
+ 105:Core/Src/countdown.c ****             uint8_t second = totalSec % 60;
+ 579              		.loc 1 105 39 is_stmt 0 view .LVU148
+ 580 01cc 244A     		ldr	r2, .L40+32
+ 581 01ce A2FB0102 		umull	r0, r2, r2, r1
+ 582 01d2 5009     		lsrs	r0, r2, #5
+ 105:Core/Src/countdown.c ****             uint8_t second = totalSec % 60;
+ 583              		.loc 1 105 21 view .LVU149
+ 584 01d4 C2F3471C 		ubfx	ip, r2, #5, #8
+ 585              	.LVL33:
+ 106:Core/Src/countdown.c ****             // 毫秒部分（取十分位）
+ 586              		.loc 1 106 13 is_stmt 1 view .LVU150
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 16
+
+
+ 106:Core/Src/countdown.c ****             // 毫秒部分（取十分位）
+ 587              		.loc 1 106 39 is_stmt 0 view .LVU151
+ 588 01d8 C0EB0010 		rsb	r0, r0, r0, lsl #4
+ 589 01dc 8200     		lsls	r2, r0, #2
+ 590 01de 8A1A     		subs	r2, r1, r2
+ 106:Core/Src/countdown.c ****             // 毫秒部分（取十分位）
+ 591              		.loc 1 106 21 view .LVU152
+ 592 01e0 D2B2     		uxtb	r2, r2
+ 593              	.LVL34:
+ 108:Core/Src/countdown.c ****             d[0] = minute; // 注意：此处只显示个位分钟（若分钟超过9可能需调�
+ 594              		.loc 1 108 13 is_stmt 1 view .LVU153
+ 108:Core/Src/countdown.c ****             d[0] = minute; // 注意：此处只显示个位分钟（若分钟超过9可能需调�
+ 595              		.loc 1 108 41 is_stmt 0 view .LVU154
+ 596 01e2 2168     		ldr	r1, [r4]
+ 597              	.LVL35:
+ 108:Core/Src/countdown.c ****             d[0] = minute; // 注意：此处只显示个位分钟（若分钟超过9可能需调�
+ 598              		.loc 1 108 41 view .LVU155
+ 599 01e4 A3FB0103 		umull	r0, r3, r3, r1
+ 600 01e8 9B09     		lsrs	r3, r3, #6
+ 601 01ea 4FF47A70 		mov	r0, #1000
+ 602 01ee 00FB1313 		mls	r3, r0, r3, r1
+ 108:Core/Src/countdown.c ****             d[0] = minute; // 注意：此处只显示个位分钟（若分钟超过9可能需调�
+ 603              		.loc 1 108 49 view .LVU156
+ 604 01f2 1C49     		ldr	r1, .L40+36
+ 605 01f4 A1FB0313 		umull	r1, r3, r1, r3
+ 108:Core/Src/countdown.c ****             d[0] = minute; // 注意：此处只显示个位分钟（若分钟超过9可能需调�
+ 606              		.loc 1 108 21 view .LVU157
+ 607 01f8 C3F34713 		ubfx	r3, r3, #5, #8
+ 608              	.LVL36:
+ 109:Core/Src/countdown.c ****             d[1] = second / 10;
+ 609              		.loc 1 109 13 is_stmt 1 view .LVU158
+ 109:Core/Src/countdown.c ****             d[1] = second / 10;
+ 610              		.loc 1 109 18 is_stmt 0 view .LVU159
+ 611 01fc 8DF804C0 		strb	ip, [sp, #4]
+ 110:Core/Src/countdown.c ****             d[2] = second % 10;
+ 612              		.loc 1 110 13 is_stmt 1 view .LVU160
+ 110:Core/Src/countdown.c ****             d[2] = second % 10;
+ 613              		.loc 1 110 18 is_stmt 0 view .LVU161
+ 614 0200 1149     		ldr	r1, .L40+8
+ 615 0202 A1FB0201 		umull	r0, r1, r1, r2
+ 616 0206 C908     		lsrs	r1, r1, #3
+ 617 0208 8DF80510 		strb	r1, [sp, #5]
+ 111:Core/Src/countdown.c ****             d[3] = ms;
+ 618              		.loc 1 111 13 is_stmt 1 view .LVU162
+ 111:Core/Src/countdown.c ****             d[3] = ms;
+ 619              		.loc 1 111 18 is_stmt 0 view .LVU163
+ 620 020c 01EB8101 		add	r1, r1, r1, lsl #2
+ 621 0210 4800     		lsls	r0, r1, #1
+ 622 0212 121A     		subs	r2, r2, r0
+ 623              	.LVL37:
+ 111:Core/Src/countdown.c ****             d[3] = ms;
+ 624              		.loc 1 111 18 view .LVU164
+ 625 0214 8DF80620 		strb	r2, [sp, #6]
+ 112:Core/Src/countdown.c ****             flag = 2;
+ 626              		.loc 1 112 13 is_stmt 1 view .LVU165
+ 112:Core/Src/countdown.c ****             flag = 2;
+ 627              		.loc 1 112 18 is_stmt 0 view .LVU166
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 17
+
+
+ 628 0218 8DF80730 		strb	r3, [sp, #7]
+ 113:Core/Src/countdown.c ****         }
+ 629              		.loc 1 113 13 is_stmt 1 view .LVU167
+ 630              	.LVL38:
+ 113:Core/Src/countdown.c ****         }
+ 631              		.loc 1 113 18 is_stmt 0 view .LVU168
+ 632 021c 0221     		movs	r1, #2
+ 633 021e 50E7     		b	.L28
+ 634              	.LVL39:
+ 635              	.L39:
+ 113:Core/Src/countdown.c ****         }
+ 636              		.loc 1 113 18 view .LVU169
+ 637              	.LBE8:
+ 119:Core/Src/countdown.c ****         {
+ 638              		.loc 1 119 9 is_stmt 1 view .LVU170
+ 119:Core/Src/countdown.c ****         {
+ 639              		.loc 1 119 13 is_stmt 0 view .LVU171
+ 640 0220 0B4B     		ldr	r3, .L40+16
+ 641 0222 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 119:Core/Src/countdown.c ****         {
+ 642              		.loc 1 119 12 view .LVU172
+ 643 0224 53B9     		cbnz	r3, .L35
+ 125:Core/Src/countdown.c ****         }
+ 644              		.loc 1 125 13 is_stmt 1 view .LVU173
+ 125:Core/Src/countdown.c ****         }
+ 645              		.loc 1 125 39 is_stmt 0 view .LVU174
+ 646 0226 0A23     		movs	r3, #10
+ 647 0228 8DF80730 		strb	r3, [sp, #7]
+ 125:Core/Src/countdown.c ****         }
+ 648              		.loc 1 125 32 view .LVU175
+ 649 022c 8DF80630 		strb	r3, [sp, #6]
+ 125:Core/Src/countdown.c ****         }
+ 650              		.loc 1 125 25 view .LVU176
+ 651 0230 8DF80530 		strb	r3, [sp, #5]
+ 125:Core/Src/countdown.c ****         }
+ 652              		.loc 1 125 18 view .LVU177
+ 653 0234 8DF80430 		strb	r3, [sp, #4]
+ 127:Core/Src/countdown.c ****     }
+ 654              		.loc 1 127 14 view .LVU178
+ 655 0238 0321     		movs	r1, #3
+ 656 023a 42E7     		b	.L28
+ 657              	.L35:
+ 658 023c 0321     		movs	r1, #3
+ 659 023e 40E7     		b	.L28
+ 660              	.L41:
+ 661              		.align	2
+ 662              	.L40:
+ 663 0240 00000000 		.word	countdownState
+ 664 0244 00000000 		.word	setMinutes
+ 665 0248 CDCCCCCC 		.word	-858993459
+ 666 024c 00000000 		.word	setSeconds
+ 667 0250 00000000 		.word	cd_blink_flag
+ 668 0254 00000000 		.word	countdownTime
+ 669 0258 BF270900 		.word	599999
+ 670 025c D34D6210 		.word	274877907
+ 671 0260 89888888 		.word	-2004318071
+ 672 0264 1F85EB51 		.word	1374389535
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 18
+
+
+ 673              		.cfi_endproc
+ 674              	.LFE66:
+ 676              		.section	.text.redCountdownTime,"ax",%progbits
+ 677              		.align	1
+ 678              		.global	redCountdownTime
+ 679              		.syntax unified
+ 680              		.thumb
+ 681              		.thumb_func
+ 683              	redCountdownTime:
+ 684              	.LFB68:
+ 152:Core/Src/countdown.c **** 
+ 153:Core/Src/countdown.c **** void redCountdownTime()
+ 154:Core/Src/countdown.c **** {
+ 685              		.loc 1 154 1 is_stmt 1 view -0
+ 686              		.cfi_startproc
+ 687              		@ args = 0, pretend = 0, frame = 0
+ 688              		@ frame_needed = 0, uses_anonymous_args = 0
+ 689              		@ link register save eliminated.
+ 155:Core/Src/countdown.c ****     countdownTime--;
+ 690              		.loc 1 155 5 view .LVU180
+ 691              		.loc 1 155 18 is_stmt 0 view .LVU181
+ 692 0000 0A4B     		ldr	r3, .L45
+ 693 0002 1A68     		ldr	r2, [r3]
+ 694 0004 013A     		subs	r2, r2, #1
+ 695 0006 1A60     		str	r2, [r3]
+ 156:Core/Src/countdown.c ****     if (countdownTime == 0)
+ 696              		.loc 1 156 5 is_stmt 1 view .LVU182
+ 697              		.loc 1 156 23 is_stmt 0 view .LVU183
+ 698 0008 1B68     		ldr	r3, [r3]
+ 699              		.loc 1 156 8 view .LVU184
+ 700 000a 33B9     		cbnz	r3, .L42
+ 157:Core/Src/countdown.c ****     {
+ 158:Core/Src/countdown.c ****         countdownState = STATE_FINISHED;
+ 701              		.loc 1 158 9 is_stmt 1 view .LVU185
+ 702              		.loc 1 158 24 is_stmt 0 view .LVU186
+ 703 000c 084B     		ldr	r3, .L45+4
+ 704 000e 0522     		movs	r2, #5
+ 705 0010 1A70     		strb	r2, [r3]
+ 159:Core/Src/countdown.c **** 
+ 160:Core/Src/countdown.c ****         // 倒计时结束，不能进入待机模式
+ 161:Core/Src/countdown.c ****         if (modeState == MODE_STATE_STANDBY)
+ 706              		.loc 1 161 9 is_stmt 1 view .LVU187
+ 707              		.loc 1 161 23 is_stmt 0 view .LVU188
+ 708 0012 084B     		ldr	r3, .L45+8
+ 709 0014 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 710              		.loc 1 161 12 view .LVU189
+ 711 0016 9342     		cmp	r3, r2
+ 712 0018 00D0     		beq	.L44
+ 713              	.L42:
+ 162:Core/Src/countdown.c ****         {
+ 163:Core/Src/countdown.c ****             modeState = MODE_STATE_COUNTDOWN;
+ 164:Core/Src/countdown.c ****             isInStandby = 0;
+ 165:Core/Src/countdown.c ****         }
+ 166:Core/Src/countdown.c ****     }
+ 167:Core/Src/countdown.c **** }
+ 714              		.loc 1 167 1 view .LVU190
+ 715 001a 7047     		bx	lr
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 19
+
+
+ 716              	.L44:
+ 163:Core/Src/countdown.c ****             isInStandby = 0;
+ 717              		.loc 1 163 13 is_stmt 1 view .LVU191
+ 163:Core/Src/countdown.c ****             isInStandby = 0;
+ 718              		.loc 1 163 23 is_stmt 0 view .LVU192
+ 719 001c 054B     		ldr	r3, .L45+8
+ 720 001e 0322     		movs	r2, #3
+ 721 0020 1A70     		strb	r2, [r3]
+ 164:Core/Src/countdown.c ****         }
+ 722              		.loc 1 164 13 is_stmt 1 view .LVU193
+ 164:Core/Src/countdown.c ****         }
+ 723              		.loc 1 164 25 is_stmt 0 view .LVU194
+ 724 0022 054B     		ldr	r3, .L45+12
+ 725 0024 0022     		movs	r2, #0
+ 726 0026 1A70     		strb	r2, [r3]
+ 727              		.loc 1 167 1 view .LVU195
+ 728 0028 F7E7     		b	.L42
+ 729              	.L46:
+ 730 002a 00BF     		.align	2
+ 731              	.L45:
+ 732 002c 00000000 		.word	countdownTime
+ 733 0030 00000000 		.word	countdownState
+ 734 0034 00000000 		.word	modeState
+ 735 0038 00000000 		.word	isInStandby
+ 736              		.cfi_endproc
+ 737              	.LFE68:
+ 739              		.section	.text.setting_countdown,"ax",%progbits
+ 740              		.align	1
+ 741              		.global	setting_countdown
+ 742              		.syntax unified
+ 743              		.thumb
+ 744              		.thumb_func
+ 746              	setting_countdown:
+ 747              	.LVL40:
+ 748              	.LFB69:
+ 168:Core/Src/countdown.c **** 
+ 169:Core/Src/countdown.c **** void setting_countdown(uint16_t GPIO_Pin)
+ 170:Core/Src/countdown.c **** {
+ 749              		.loc 1 170 1 is_stmt 1 view -0
+ 750              		.cfi_startproc
+ 751              		@ args = 0, pretend = 0, frame = 0
+ 752              		@ frame_needed = 0, uses_anonymous_args = 0
+ 753              		@ link register save eliminated.
+ 171:Core/Src/countdown.c ****     if (GPIO_Pin == BUTTON_INTERRUPT_1_Pin)
+ 754              		.loc 1 171 5 view .LVU197
+ 755              		.loc 1 171 8 is_stmt 0 view .LVU198
+ 756 0000 0128     		cmp	r0, #1
+ 757 0002 02D0     		beq	.L60
+ 172:Core/Src/countdown.c ****     {
+ 173:Core/Src/countdown.c ****         if (countdownState == STATE_IDLE)
+ 174:Core/Src/countdown.c ****         {
+ 175:Core/Src/countdown.c ****             // 进入设置模式：先设置分钟
+ 176:Core/Src/countdown.c ****             countdownState = STATE_SETTING_MIN;
+ 177:Core/Src/countdown.c ****         }
+ 178:Core/Src/countdown.c ****         else if (countdownState == STATE_SETTING_MIN)
+ 179:Core/Src/countdown.c ****         {
+ 180:Core/Src/countdown.c ****             // 保存分钟设置，进入设置秒钟
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 20
+
+
+ 181:Core/Src/countdown.c ****             countdownState = STATE_SETTING_SEC;
+ 182:Core/Src/countdown.c ****         }
+ 183:Core/Src/countdown.c ****         else if (countdownState == STATE_SETTING_SEC || countdownState == STATE_COUNTDOWN)
+ 184:Core/Src/countdown.c ****         {
+ 185:Core/Src/countdown.c ****             // 保存秒钟设置，退出设置，准备倒计时
+ 186:Core/Src/countdown.c ****             countdownState = STATE_IDLE;
+ 187:Core/Src/countdown.c ****         }
+ 188:Core/Src/countdown.c ****     }
+ 189:Core/Src/countdown.c ****     else if (GPIO_Pin == BUTTON_INTERRUPT_2_Pin)
+ 758              		.loc 1 189 10 is_stmt 1 view .LVU199
+ 759              		.loc 1 189 13 is_stmt 0 view .LVU200
+ 760 0004 8028     		cmp	r0, #128
+ 761 0006 1BD0     		beq	.L61
+ 762              	.L47:
+ 190:Core/Src/countdown.c ****     {
+ 191:Core/Src/countdown.c ****         if (countdownState == STATE_SETTING_MIN)
+ 192:Core/Src/countdown.c ****         {
+ 193:Core/Src/countdown.c ****             // 分钟减1，范围0～60（从0减则回到60）
+ 194:Core/Src/countdown.c ****             if (setMinutes == 0)
+ 195:Core/Src/countdown.c ****                 setMinutes = 60;
+ 196:Core/Src/countdown.c ****             else
+ 197:Core/Src/countdown.c ****                 setMinutes--;
+ 198:Core/Src/countdown.c ****         }
+ 199:Core/Src/countdown.c ****         else if (countdownState == STATE_SETTING_SEC)
+ 200:Core/Src/countdown.c ****         {
+ 201:Core/Src/countdown.c ****             // 秒钟减1，范围0～60（从0减则回到60）
+ 202:Core/Src/countdown.c ****             if (setSeconds == 0)
+ 203:Core/Src/countdown.c ****                 setSeconds = 60;
+ 204:Core/Src/countdown.c ****             else
+ 205:Core/Src/countdown.c ****                 setSeconds--;
+ 206:Core/Src/countdown.c ****         }
+ 207:Core/Src/countdown.c ****         else if (countdownState == STATE_IDLE)
+ 208:Core/Src/countdown.c ****         {
+ 209:Core/Src/countdown.c ****             // 将倒计时初始化（转换为毫秒）
+ 210:Core/Src/countdown.c ****             countdownTime = ((uint32_t)setMinutes * 60 + setSeconds) * 1000;
+ 211:Core/Src/countdown.c ****             // 在就绪状态下按PA7开始倒计时
+ 212:Core/Src/countdown.c ****             if (countdownTime > 0)
+ 213:Core/Src/countdown.c ****             {
+ 214:Core/Src/countdown.c ****                 countdownState = STATE_COUNTDOWN;
+ 215:Core/Src/countdown.c ****             }
+ 216:Core/Src/countdown.c ****         }
+ 217:Core/Src/countdown.c ****         else if (countdownState == STATE_COUNTDOWN)
+ 218:Core/Src/countdown.c ****         {
+ 219:Core/Src/countdown.c ****             countdownState = STATE_STOP;
+ 220:Core/Src/countdown.c ****         }
+ 221:Core/Src/countdown.c ****         else if (countdownState == STATE_STOP)
+ 222:Core/Src/countdown.c ****         {
+ 223:Core/Src/countdown.c ****             countdownState = STATE_COUNTDOWN;
+ 224:Core/Src/countdown.c ****         }
+ 225:Core/Src/countdown.c ****         else if (countdownState == STATE_FINISHED)
+ 226:Core/Src/countdown.c ****         {
+ 227:Core/Src/countdown.c ****             // 倒计时结束时，按PA7停止闪烁并回到就绪状态
+ 228:Core/Src/countdown.c ****             countdownState = STATE_IDLE;
+ 229:Core/Src/countdown.c ****             countdownTime = ((uint32_t)setMinutes * 60 + setSeconds) * 1000;
+ 230:Core/Src/countdown.c ****         }
+ 231:Core/Src/countdown.c ****     }
+ 232:Core/Src/countdown.c **** }
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 21
+
+
+ 763              		.loc 1 232 1 view .LVU201
+ 764 0008 7047     		bx	lr
+ 765              	.L60:
+ 173:Core/Src/countdown.c ****         {
+ 766              		.loc 1 173 9 is_stmt 1 view .LVU202
+ 173:Core/Src/countdown.c ****         {
+ 767              		.loc 1 173 28 is_stmt 0 view .LVU203
+ 768 000a 3E4B     		ldr	r3, .L67
+ 769 000c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 173:Core/Src/countdown.c ****         {
+ 770              		.loc 1 173 12 view .LVU204
+ 771 000e 1BB9     		cbnz	r3, .L49
+ 176:Core/Src/countdown.c ****         }
+ 772              		.loc 1 176 13 is_stmt 1 view .LVU205
+ 176:Core/Src/countdown.c ****         }
+ 773              		.loc 1 176 28 is_stmt 0 view .LVU206
+ 774 0010 3C4B     		ldr	r3, .L67
+ 775 0012 0122     		movs	r2, #1
+ 776 0014 1A70     		strb	r2, [r3]
+ 777 0016 7047     		bx	lr
+ 778              	.L49:
+ 178:Core/Src/countdown.c ****         {
+ 779              		.loc 1 178 14 is_stmt 1 view .LVU207
+ 178:Core/Src/countdown.c ****         {
+ 780              		.loc 1 178 33 is_stmt 0 view .LVU208
+ 781 0018 3A4B     		ldr	r3, .L67
+ 782 001a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 178:Core/Src/countdown.c ****         {
+ 783              		.loc 1 178 17 view .LVU209
+ 784 001c 012B     		cmp	r3, #1
+ 785 001e 0BD0     		beq	.L62
+ 183:Core/Src/countdown.c ****         {
+ 786              		.loc 1 183 14 is_stmt 1 view .LVU210
+ 183:Core/Src/countdown.c ****         {
+ 787              		.loc 1 183 33 is_stmt 0 view .LVU211
+ 788 0020 384B     		ldr	r3, .L67
+ 789 0022 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 183:Core/Src/countdown.c ****         {
+ 790              		.loc 1 183 17 view .LVU212
+ 791 0024 022B     		cmp	r3, #2
+ 792 0026 03D0     		beq	.L52
+ 183:Core/Src/countdown.c ****         {
+ 793              		.loc 1 183 72 discriminator 1 view .LVU213
+ 794 0028 364B     		ldr	r3, .L67
+ 795 002a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 183:Core/Src/countdown.c ****         {
+ 796              		.loc 1 183 54 discriminator 1 view .LVU214
+ 797 002c 032B     		cmp	r3, #3
+ 798 002e EBD1     		bne	.L47
+ 799              	.L52:
+ 186:Core/Src/countdown.c ****         }
+ 800              		.loc 1 186 13 is_stmt 1 view .LVU215
+ 186:Core/Src/countdown.c ****         }
+ 801              		.loc 1 186 28 is_stmt 0 view .LVU216
+ 802 0030 344B     		ldr	r3, .L67
+ 803 0032 0022     		movs	r2, #0
+ 804 0034 1A70     		strb	r2, [r3]
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 22
+
+
+ 805 0036 7047     		bx	lr
+ 806              	.L62:
+ 181:Core/Src/countdown.c ****         }
+ 807              		.loc 1 181 13 is_stmt 1 view .LVU217
+ 181:Core/Src/countdown.c ****         }
+ 808              		.loc 1 181 28 is_stmt 0 view .LVU218
+ 809 0038 324B     		ldr	r3, .L67
+ 810 003a 0222     		movs	r2, #2
+ 811 003c 1A70     		strb	r2, [r3]
+ 812 003e 7047     		bx	lr
+ 813              	.L61:
+ 191:Core/Src/countdown.c ****         {
+ 814              		.loc 1 191 9 is_stmt 1 view .LVU219
+ 191:Core/Src/countdown.c ****         {
+ 815              		.loc 1 191 28 is_stmt 0 view .LVU220
+ 816 0040 304B     		ldr	r3, .L67
+ 817 0042 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 191:Core/Src/countdown.c ****         {
+ 818              		.loc 1 191 12 view .LVU221
+ 819 0044 012B     		cmp	r3, #1
+ 820 0046 1CD0     		beq	.L63
+ 199:Core/Src/countdown.c ****         {
+ 821              		.loc 1 199 14 is_stmt 1 view .LVU222
+ 199:Core/Src/countdown.c ****         {
+ 822              		.loc 1 199 33 is_stmt 0 view .LVU223
+ 823 0048 2E4B     		ldr	r3, .L67
+ 824 004a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 199:Core/Src/countdown.c ****         {
+ 825              		.loc 1 199 17 view .LVU224
+ 826 004c 022B     		cmp	r3, #2
+ 827 004e 25D0     		beq	.L64
+ 207:Core/Src/countdown.c ****         {
+ 828              		.loc 1 207 14 is_stmt 1 view .LVU225
+ 207:Core/Src/countdown.c ****         {
+ 829              		.loc 1 207 33 is_stmt 0 view .LVU226
+ 830 0050 2C4B     		ldr	r3, .L67
+ 831 0052 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 207:Core/Src/countdown.c ****         {
+ 832              		.loc 1 207 17 view .LVU227
+ 833 0054 002B     		cmp	r3, #0
+ 834 0056 2ED1     		bne	.L57
+ 210:Core/Src/countdown.c ****             // 在就绪状态下按PA7开始倒计时
+ 835              		.loc 1 210 13 is_stmt 1 view .LVU228
+ 210:Core/Src/countdown.c ****             // 在就绪状态下按PA7开始倒计时
+ 836              		.loc 1 210 30 is_stmt 0 view .LVU229
+ 837 0058 2B4B     		ldr	r3, .L67+4
+ 838 005a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 210:Core/Src/countdown.c ****             // 在就绪状态下按PA7开始倒计时
+ 839              		.loc 1 210 51 view .LVU230
+ 840 005c C3EB0312 		rsb	r2, r3, r3, lsl #4
+ 210:Core/Src/countdown.c ****             // 在就绪状态下按PA7开始倒计时
+ 841              		.loc 1 210 56 view .LVU231
+ 842 0060 2A4B     		ldr	r3, .L67+8
+ 843 0062 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 844 0064 03EB8203 		add	r3, r3, r2, lsl #2
+ 210:Core/Src/countdown.c ****             // 在就绪状态下按PA7开始倒计时
+ 845              		.loc 1 210 70 view .LVU232
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 23
+
+
+ 846 0068 4FF47A72 		mov	r2, #1000
+ 847 006c 02FB03F3 		mul	r3, r2, r3
+ 210:Core/Src/countdown.c ****             // 在就绪状态下按PA7开始倒计时
+ 848              		.loc 1 210 27 view .LVU233
+ 849 0070 274A     		ldr	r2, .L67+12
+ 850 0072 1360     		str	r3, [r2]
+ 212:Core/Src/countdown.c ****             {
+ 851              		.loc 1 212 13 is_stmt 1 view .LVU234
+ 212:Core/Src/countdown.c ****             {
+ 852              		.loc 1 212 31 is_stmt 0 view .LVU235
+ 853 0074 1368     		ldr	r3, [r2]
+ 212:Core/Src/countdown.c ****             {
+ 854              		.loc 1 212 16 view .LVU236
+ 855 0076 002B     		cmp	r3, #0
+ 856 0078 C6D0     		beq	.L47
+ 214:Core/Src/countdown.c ****             }
+ 857              		.loc 1 214 17 is_stmt 1 view .LVU237
+ 214:Core/Src/countdown.c ****             }
+ 858              		.loc 1 214 32 is_stmt 0 view .LVU238
+ 859 007a 224B     		ldr	r3, .L67
+ 860 007c 0322     		movs	r2, #3
+ 861 007e 1A70     		strb	r2, [r3]
+ 862 0080 7047     		bx	lr
+ 863              	.L63:
+ 194:Core/Src/countdown.c ****                 setMinutes = 60;
+ 864              		.loc 1 194 13 is_stmt 1 view .LVU239
+ 194:Core/Src/countdown.c ****                 setMinutes = 60;
+ 865              		.loc 1 194 28 is_stmt 0 view .LVU240
+ 866 0082 214B     		ldr	r3, .L67+4
+ 867 0084 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 194:Core/Src/countdown.c ****                 setMinutes = 60;
+ 868              		.loc 1 194 16 view .LVU241
+ 869 0086 1BB9     		cbnz	r3, .L54
+ 195:Core/Src/countdown.c ****             else
+ 870              		.loc 1 195 17 is_stmt 1 view .LVU242
+ 195:Core/Src/countdown.c ****             else
+ 871              		.loc 1 195 28 is_stmt 0 view .LVU243
+ 872 0088 1F4B     		ldr	r3, .L67+4
+ 873 008a 3C22     		movs	r2, #60
+ 874 008c 1A70     		strb	r2, [r3]
+ 875 008e 7047     		bx	lr
+ 876              	.L54:
+ 197:Core/Src/countdown.c ****         }
+ 877              		.loc 1 197 17 is_stmt 1 view .LVU244
+ 197:Core/Src/countdown.c ****         }
+ 878              		.loc 1 197 27 is_stmt 0 view .LVU245
+ 879 0090 1D4A     		ldr	r2, .L67+4
+ 880 0092 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 881 0094 013B     		subs	r3, r3, #1
+ 882 0096 DBB2     		uxtb	r3, r3
+ 883 0098 1370     		strb	r3, [r2]
+ 884 009a 7047     		bx	lr
+ 885              	.L64:
+ 202:Core/Src/countdown.c ****                 setSeconds = 60;
+ 886              		.loc 1 202 13 is_stmt 1 view .LVU246
+ 202:Core/Src/countdown.c ****                 setSeconds = 60;
+ 887              		.loc 1 202 28 is_stmt 0 view .LVU247
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 24
+
+
+ 888 009c 1B4B     		ldr	r3, .L67+8
+ 889 009e 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 202:Core/Src/countdown.c ****                 setSeconds = 60;
+ 890              		.loc 1 202 16 view .LVU248
+ 891 00a0 1BB9     		cbnz	r3, .L56
+ 203:Core/Src/countdown.c ****             else
+ 892              		.loc 1 203 17 is_stmt 1 view .LVU249
+ 203:Core/Src/countdown.c ****             else
+ 893              		.loc 1 203 28 is_stmt 0 view .LVU250
+ 894 00a2 1A4B     		ldr	r3, .L67+8
+ 895 00a4 3C22     		movs	r2, #60
+ 896 00a6 1A70     		strb	r2, [r3]
+ 897 00a8 7047     		bx	lr
+ 898              	.L56:
+ 205:Core/Src/countdown.c ****         }
+ 899              		.loc 1 205 17 is_stmt 1 view .LVU251
+ 205:Core/Src/countdown.c ****         }
+ 900              		.loc 1 205 27 is_stmt 0 view .LVU252
+ 901 00aa 184A     		ldr	r2, .L67+8
+ 902 00ac 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 903 00ae 013B     		subs	r3, r3, #1
+ 904 00b0 DBB2     		uxtb	r3, r3
+ 905 00b2 1370     		strb	r3, [r2]
+ 906 00b4 7047     		bx	lr
+ 907              	.L57:
+ 217:Core/Src/countdown.c ****         {
+ 908              		.loc 1 217 14 is_stmt 1 view .LVU253
+ 217:Core/Src/countdown.c ****         {
+ 909              		.loc 1 217 33 is_stmt 0 view .LVU254
+ 910 00b6 134B     		ldr	r3, .L67
+ 911 00b8 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 217:Core/Src/countdown.c ****         {
+ 912              		.loc 1 217 17 view .LVU255
+ 913 00ba 032B     		cmp	r3, #3
+ 914 00bc 19D0     		beq	.L65
+ 221:Core/Src/countdown.c ****         {
+ 915              		.loc 1 221 14 is_stmt 1 view .LVU256
+ 221:Core/Src/countdown.c ****         {
+ 916              		.loc 1 221 33 is_stmt 0 view .LVU257
+ 917 00be 114B     		ldr	r3, .L67
+ 918 00c0 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 221:Core/Src/countdown.c ****         {
+ 919              		.loc 1 221 17 view .LVU258
+ 920 00c2 042B     		cmp	r3, #4
+ 921 00c4 19D0     		beq	.L66
+ 225:Core/Src/countdown.c ****         {
+ 922              		.loc 1 225 14 is_stmt 1 view .LVU259
+ 225:Core/Src/countdown.c ****         {
+ 923              		.loc 1 225 33 is_stmt 0 view .LVU260
+ 924 00c6 0F4B     		ldr	r3, .L67
+ 925 00c8 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 225:Core/Src/countdown.c ****         {
+ 926              		.loc 1 225 17 view .LVU261
+ 927 00ca 052B     		cmp	r3, #5
+ 928 00cc 9CD1     		bne	.L47
+ 228:Core/Src/countdown.c ****             countdownTime = ((uint32_t)setMinutes * 60 + setSeconds) * 1000;
+ 929              		.loc 1 228 13 is_stmt 1 view .LVU262
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 25
+
+
+ 228:Core/Src/countdown.c ****             countdownTime = ((uint32_t)setMinutes * 60 + setSeconds) * 1000;
+ 930              		.loc 1 228 28 is_stmt 0 view .LVU263
+ 931 00ce 0D4B     		ldr	r3, .L67
+ 932 00d0 0022     		movs	r2, #0
+ 933 00d2 1A70     		strb	r2, [r3]
+ 229:Core/Src/countdown.c ****         }
+ 934              		.loc 1 229 13 is_stmt 1 view .LVU264
+ 229:Core/Src/countdown.c ****         }
+ 935              		.loc 1 229 30 is_stmt 0 view .LVU265
+ 936 00d4 0C4B     		ldr	r3, .L67+4
+ 937 00d6 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 229:Core/Src/countdown.c ****         }
+ 938              		.loc 1 229 51 view .LVU266
+ 939 00d8 C3EB0312 		rsb	r2, r3, r3, lsl #4
+ 229:Core/Src/countdown.c ****         }
+ 940              		.loc 1 229 56 view .LVU267
+ 941 00dc 0B4B     		ldr	r3, .L67+8
+ 942 00de 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 943 00e0 03EB8203 		add	r3, r3, r2, lsl #2
+ 229:Core/Src/countdown.c ****         }
+ 944              		.loc 1 229 70 view .LVU268
+ 945 00e4 4FF47A72 		mov	r2, #1000
+ 946 00e8 02FB03F3 		mul	r3, r2, r3
+ 229:Core/Src/countdown.c ****         }
+ 947              		.loc 1 229 27 view .LVU269
+ 948 00ec 084A     		ldr	r2, .L67+12
+ 949 00ee 1360     		str	r3, [r2]
+ 950              		.loc 1 232 1 view .LVU270
+ 951 00f0 8AE7     		b	.L47
+ 952              	.L65:
+ 219:Core/Src/countdown.c ****         }
+ 953              		.loc 1 219 13 is_stmt 1 view .LVU271
+ 219:Core/Src/countdown.c ****         }
+ 954              		.loc 1 219 28 is_stmt 0 view .LVU272
+ 955 00f2 044B     		ldr	r3, .L67
+ 956 00f4 0422     		movs	r2, #4
+ 957 00f6 1A70     		strb	r2, [r3]
+ 958 00f8 7047     		bx	lr
+ 959              	.L66:
+ 223:Core/Src/countdown.c ****         }
+ 960              		.loc 1 223 13 is_stmt 1 view .LVU273
+ 223:Core/Src/countdown.c ****         }
+ 961              		.loc 1 223 28 is_stmt 0 view .LVU274
+ 962 00fa 024B     		ldr	r3, .L67
+ 963 00fc 0322     		movs	r2, #3
+ 964 00fe 1A70     		strb	r2, [r3]
+ 965 0100 7047     		bx	lr
+ 966              	.L68:
+ 967 0102 00BF     		.align	2
+ 968              	.L67:
+ 969 0104 00000000 		.word	countdownState
+ 970 0108 00000000 		.word	setMinutes
+ 971 010c 00000000 		.word	setSeconds
+ 972 0110 00000000 		.word	countdownTime
+ 973              		.cfi_endproc
+ 974              	.LFE69:
+ 976              		.section	.bss.last_blink_time.0,"aw",%nobits
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 26
+
+
+ 977              		.align	2
+ 980              	last_blink_time.0:
+ 981 0000 00000000 		.space	4
+ 982              		.global	lastBlinkTime
+ 983              		.section	.bss.lastBlinkTime,"aw",%nobits
+ 984              		.align	2
+ 987              	lastBlinkTime:
+ 988 0000 00000000 		.space	4
+ 989              		.global	cd_blink_flag
+ 990              		.section	.bss.cd_blink_flag,"aw",%nobits
+ 993              	cd_blink_flag:
+ 994 0000 00       		.space	1
+ 995              		.global	countdownTime
+ 996              		.section	.bss.countdownTime,"aw",%nobits
+ 997              		.align	2
+ 1000              	countdownTime:
+ 1001 0000 00000000 		.space	4
+ 1002              		.global	setSeconds
+ 1003              		.section	.bss.setSeconds,"aw",%nobits
+ 1006              	setSeconds:
+ 1007 0000 00       		.space	1
+ 1008              		.global	setMinutes
+ 1009              		.section	.data.setMinutes,"aw"
+ 1012              	setMinutes:
+ 1013 0000 02       		.byte	2
+ 1014              		.global	countdownState
+ 1015              		.section	.bss.countdownState,"aw",%nobits
+ 1018              	countdownState:
+ 1019 0000 00       		.space	1
+ 1020              		.text
+ 1021              	.Letext0:
+ 1022              		.file 2 "D:/arm-none-eabi-gcc/arm-none-eabi/include/machine/_default_types.h"
+ 1023              		.file 3 "D:/arm-none-eabi-gcc/arm-none-eabi/include/sys/_stdint.h"
+ 1024              		.file 4 "Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h"
+ 1025              		.file 5 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h"
+ 1026              		.file 6 "Core/Inc/countdown.h"
+ 1027              		.file 7 "Core/Inc/main.h"
+ 1028              		.file 8 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h"
+ARM GAS  C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s 			page 27
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 countdown.c
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:19     .text.display_countdown:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:25     .text.display_countdown:00000000 display_countdown
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:194    .text.display_countdown:000000b0 $d
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:993    .bss.cd_blink_flag:00000000 cd_blink_flag
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:204    .text.blink_control_countdown:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:210    .text.blink_control_countdown:00000000 blink_control_countdown
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:257    .text.blink_control_countdown:0000002c $d
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:980    .bss.last_blink_time.0:00000000 last_blink_time.0
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:263    .text.run_countdown:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:269    .text.run_countdown:00000000 run_countdown
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:663    .text.run_countdown:00000240 $d
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:1018   .bss.countdownState:00000000 countdownState
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:1012   .data.setMinutes:00000000 setMinutes
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:1006   .bss.setSeconds:00000000 setSeconds
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:1000   .bss.countdownTime:00000000 countdownTime
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:677    .text.redCountdownTime:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:683    .text.redCountdownTime:00000000 redCountdownTime
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:732    .text.redCountdownTime:0000002c $d
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:740    .text.setting_countdown:00000000 $t
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:746    .text.setting_countdown:00000000 setting_countdown
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:969    .text.setting_countdown:00000104 $d
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:977    .bss.last_blink_time.0:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:987    .bss.lastBlinkTime:00000000 lastBlinkTime
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:984    .bss.lastBlinkTime:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:994    .bss.cd_blink_flag:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:997    .bss.countdownTime:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:1007   .bss.setSeconds:00000000 $d
+C:\Users\93980\AppData\Local\Temp\ccdwfHMN.s:1019   .bss.countdownState:00000000 $d
+
+UNDEFINED SYMBOLS
+HAL_GPIO_WritePin
+HAL_Delay
+LED_ARR
+DIGIT_COUNT
+DIGIT_ARR
+segment_code
+HAL_GetTick
+modeState
+isInStandby
